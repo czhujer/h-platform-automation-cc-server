@@ -1,4 +1,4 @@
-module github.com/czhujer/h-platform-automation-cc-server
+module cc-server
 
 go 1.13
 
