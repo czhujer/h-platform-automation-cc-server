@@ -11,7 +11,12 @@ import (
 	"os"
 )
 
-func homeLink(w http.ResponseWriter, r *http.Request) {
+func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "")
+}
+
+func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprintf(w, "")
 }
 
@@ -31,9 +36,11 @@ func main() {
 
 	router.Path("/metrics").Handler(promhttp.Handler())
 
-	router.HandleFunc("/", homeLink)
+	router.HandleFunc("/", homeLinkHandler)
 
 	router.Handle("/calculoid/webhook", calculoidHandler.CalculoidWebhook())
+
+	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {
