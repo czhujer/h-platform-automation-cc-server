@@ -40,7 +40,8 @@ func main() {
 
 	router.Handle("/calculoid/webhook", calculoidHandler.CalculoidWebhook())
 
-	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
+	notFoundHandlerFunc := http.HandlerFunc(notFoundHandler)
+	router.NotFoundHandler = http.Handler(middleware.InstrumentHandlerDuration(notFoundHandlerFunc))
 
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {
