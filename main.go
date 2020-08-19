@@ -4,6 +4,7 @@ import (
 	"cc-server/calculoid"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
