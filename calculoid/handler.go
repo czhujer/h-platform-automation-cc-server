@@ -39,7 +39,7 @@ type CalculoidDataPayment struct {
 	Status string `json:"status"`
 }
 
-func queryParams(w http.ResponseWriter, r *http.Request) {
+func (g *Handler) queryParams(w http.ResponseWriter, r *http.Request) {
 	var err error
 	receivedData, err = ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -48,7 +48,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 	//log.Printf("received data: %s \n", receivedData)
 }
 
-func CalculoidWebhook() http.HandlerFunc {
+func (g *Handler) CalculoidWebhook() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		code := http.StatusBadRequest
@@ -74,7 +74,7 @@ func CalculoidWebhook() http.HandlerFunc {
 	}
 }
 
-func calculoidWebhookParser() {
+func (g *Handler) calculoidWebhookParser() {
 	var parsedData CalculoidData
 
 	//log.Printf("received data for parsing: %s \n", receivedData)
