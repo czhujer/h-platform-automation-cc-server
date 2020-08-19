@@ -44,7 +44,8 @@ func main() {
 	notFoundHandlerFunc := http.HandlerFunc(notFoundHandler)
 	router.NotFoundHandler = http.Handler(middleware.InstrumentHandlerDuration(notFoundHandlerFunc))
 
-	err := http.ListenAndServe(":8080", router)
+	loggedRouter := handlers.CombinedLoggingHandler(os.Stdout, router)
+	err := http.ListenAndServe(":8080", loggedRouter)
 	if err != nil {
 		panic(err)
 	}
