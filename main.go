@@ -81,7 +81,11 @@ func main() {
 
 	router.Handle("/calculoid/webhook", calculoidHandler.CalculoidWebhook())
 
-	notFoundHandlerFunc := http.HandlerFunc(notFoundHandler)
+	notFoundHandlermw := gorilla.Middleware(
+		tracer,
+		http.HandlerFunc(notFoundHandler),
+	)
+	notFoundHandlerFunc := http.Handler(notFoundHandlermw)
 	router.NotFoundHandler = http.Handler(middleware.InstrumentHandlerDuration(notFoundHandlerFunc))
 
 	// Add tracing to all routes
