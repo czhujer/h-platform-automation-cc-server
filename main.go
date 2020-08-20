@@ -1,119 +1,111 @@
 package main
 
 import (
-	"encoding/json"
+	"cc-server/calculoid"
 	"fmt"
+	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"io/ioutil"
+	"github.com/opentracing-contrib/go-gorilla/gorilla"
+	"github.com/opentracing/opentracing-go"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/uber/jaeger-client-go"
+	jaegercfg "github.com/uber/jaeger-client-go/config"
+	jaegerlog "github.com/uber/jaeger-client-go/log"
+	"github.com/uber/jaeger-lib/metrics/prometheus"
 	"log"
 	"net/http"
 	"os"
 )
 
-var receivedData []byte
-
-type CalculoidData struct {
-	CalculatorId        string               `json:"calculatorId"`
-	Email               string               `json:"email"`
-	Id                  string               `json:"id"`
-	CalculoidDataParams CalculoidDataParams  `json:"params"`
-	UserSignature       string               `json:"userSignature"`
-	FromEmail           string               `json:"fromEmail"`
-	Fields              CalculoidDataField   `json:"fields"`
-	Payment             CalculoidDataPayment `json:"Payment"`
-}
-
-type CalculoidDataParams struct {
-}
-
-type CalculoidDataField map[string]CalculoidDataFields
-
-type CalculoidDataFields struct {
-	CalculatorFieldId string `json:"calculatorFieldId"`
-	Name              string `json:"name"`
-}
-
-type CalculoidDataPayment struct {
-	Id     string `json:"id"`
-	Status string `json:"status"`
-}
-
-func homeLink(w http.ResponseWriter, r *http.Request) {
+func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "")
 }
 
-func CalculoidWebhook() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		code := http.StatusBadRequest
-		if r.Method == "GET" {
-			code = http.StatusOK
-			result := fmt.Sprintln("CalculoidWebhook")
-			_, err = w.Write([]byte(result))
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else if r.Method == "POST" {
-			code = http.StatusOK
-			result := fmt.Sprintln("CalculoidWebhook")
-			_, err = w.Write([]byte(result))
-			if err != nil {
-				log.Fatal(err)
-			}
-			queryParams(w, r)
-			calculoidWebhookParser()
-		} else {
-			w.WriteHeader(code)
-		}
-	}
-}
-
-func queryParams(w http.ResponseWriter, r *http.Request) {
-	var err error
-	receivedData, err = ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//log.Printf("received data: %s \n", receivedData)
-}
-
-func calculoidWebhookParser() {
-	var parsedData CalculoidData
-
-	//log.Printf("received data for parsing: %s \n", receivedData)
-
-	err := json.Unmarshal([]byte(receivedData), &parsedData)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-
-	log.Println("received data after parsing:")
-
-	fmt.Printf("\ncalculatorId: %v\n", parsedData.CalculatorId)
-	fmt.Printf("email: %s\n", parsedData.Email)
-
-	fmt.Printf("fromEmail: %s\n", parsedData.FromEmail)
-
-	for key := range parsedData.Fields {
-		fmt.Printf("Fields: Key: %s Values: ", key)
-		fmt.Printf("calculatorFieldId: %s ", parsedData.Fields[key].CalculatorFieldId)
-		fmt.Printf("calculatorFieldId: %s ", parsedData.Fields[key].Name)
-
-		fmt.Println("")
-	}
-
-	fmt.Printf("Payment ID: %v and Status: %v \n", parsedData.Payment.Id, parsedData.Payment.Status)
-
-	fmt.Println("")
+func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprintf(w, "")
 }
 
 func main() {
 
+	// http listen port
+	const httpAddress = ":8080"
+
 	filename := os.Args[0]
+	var opts prometheusmiddleware.Opts
+
 	log.Printf("starting %s \n", filename)
 
+	middleware := prometheusmiddleware.NewPrometheusMiddleware(opts)
+
+	calculoidHandler := &calculoid.Handler{}
+
+	tracingcfg, err := jaegercfg.FromEnv()
+	if err != nil {
+		log.Printf("Could not parse Jaeger env vars: %s", err.Error())
+		return
+	}
+
+	if tracingcfg.ServiceName == "" {
+		tracingcfg.ServiceName = "c-and-c-server"
+	}
+	log.Printf("Jaeger ServiceName: %s", tracingcfg.ServiceName)
+	log.Printf("Jaeger LocalAgentHostPort: %s", tracingcfg.Reporter.LocalAgentHostPort)
+
+	tracingcfg.Sampler.Type = jaeger.SamplerTypeConst
+	tracingcfg.Sampler.Param = 1
+	tracingcfg.Reporter.LogSpans = true
+
+	jLogger := jaegerlog.StdLogger
+	jMetricsFactory := prometheus.New()
+
+	// Initialize tracer with a logger and a metrics factory
+	tracer, closer, err := tracingcfg.NewTracer(
+		jaegercfg.Logger(jLogger),
+		jaegercfg.Metrics(jMetricsFactory),
+	)
+	if err != nil {
+		log.Fatal("cannot initialize Jaeger Tracer: ", err)
+	}
+
+	opentracing.SetGlobalTracer(tracer)
+	defer closer.Close()
+
+	// Initialize router
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", homeLink)
-	router.Handle("/calculoid/webhook", CalculoidWebhook())
-	log.Fatal(http.ListenAndServe(":8080", router))
+	router.Use(middleware.InstrumentHandlerDuration)
+
+	// handlers
+	router.Path("/metrics").Handler(promhttp.Handler())
+
+	router.HandleFunc("/", homeLinkHandler)
+
+	router.Handle("/calculoid/webhook", calculoidHandler.CalculoidWebhook())
+
+	// default handler
+	notFoundHandlermw := gorilla.Middleware(
+		tracer,
+		http.HandlerFunc(notFoundHandler),
+	)
+	notFoundHandlerFunc := http.Handler(notFoundHandlermw)
+	router.NotFoundHandler = http.Handler(middleware.InstrumentHandlerDuration(notFoundHandlerFunc))
+
+	// Add tracing to all routes
+	_ = router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+		route.Handler(
+			gorilla.Middleware(tracer, route.GetHandler()))
+		return nil
+	})
+
+	// Add apache-like logging to all routes
+	loggedRouter := handlers.CombinedLoggingHandler(os.Stdout, router)
+
+	// start server
+	err = http.ListenAndServe(
+		httpAddress,
+		loggedRouter)
+	if err != nil {
+		panic(err)
+	}
 }
