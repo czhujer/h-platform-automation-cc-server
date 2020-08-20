@@ -4,15 +4,15 @@ import (
 	"cc-server/calculoid"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
-	"github.com/uber/jaeger-client-go"
-	"github.com/uber/jaeger-lib/metrics/prometheus"
-	//"github.com/gorilla/handlers"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/opentracing-contrib/go-gorilla/gorilla"
 	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-client-go/log"
+	"github.com/uber/jaeger-lib/metrics/prometheus"
 	"log"
 	"net/http"
 	"os"
@@ -69,7 +69,6 @@ func main() {
 		log.Fatal("cannot initialize Jaeger Tracer: ", err)
 	}
 
-	// Set the singleton opentracing.Tracer with the Jaeger tracer.
 	opentracing.SetGlobalTracer(tracer)
 	defer closer.Close()
 
@@ -93,12 +92,12 @@ func main() {
 	})
 
 	// Add apache-like logging to all routes
-	//loggedRouter := handlers.CombinedLoggingHandler(os.Stdout, router)
+	loggedRouter := handlers.CombinedLoggingHandler(os.Stdout, router)
 
 	// start server
 	err = http.ListenAndServe(
 		httpAddress,
-		router)
+		loggedRouter)
 	if err != nil {
 		panic(err)
 	}

@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/albertogviana/prometheus-middleware v0.0.1
-	github.com/gorilla/handlers v1.4.2 // indirect
+	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644
 	github.com/opentracing-contrib/go-stdlib v1.0.0 // indirect

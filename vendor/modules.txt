@@ -10,6 +10,8 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/gorilla/handlers v1.4.2
+github.com/gorilla/handlers
 # github.com/gorilla/mux v1.7.4
 github.com/gorilla/mux
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
