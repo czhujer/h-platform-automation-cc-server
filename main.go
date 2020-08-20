@@ -72,15 +72,18 @@ func main() {
 	opentracing.SetGlobalTracer(tracer)
 	defer closer.Close()
 
+	// Initialize router
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(middleware.InstrumentHandlerDuration)
 
+	// handlers
 	router.Path("/metrics").Handler(promhttp.Handler())
 
 	router.HandleFunc("/", homeLinkHandler)
 
 	router.Handle("/calculoid/webhook", calculoidHandler.CalculoidWebhook())
 
+	// default handler
 	notFoundHandlermw := gorilla.Middleware(
 		tracer,
 		http.HandlerFunc(notFoundHandler),
