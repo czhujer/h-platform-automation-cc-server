@@ -68,6 +68,10 @@ func (c *Handler) CalculoidWebhook() http.HandlerFunc {
 			}
 			c.queryParams(w, r)
 			c.calculoidWebhookParser()
+
+			// TODO
+			// missing http code handling with correspondig status with c.calculoidWebhookParser()
+
 		} else {
 			w.WriteHeader(code)
 		}
@@ -102,4 +106,8 @@ func (c *Handler) calculoidWebhookParser() {
 	fmt.Printf("Payment ID: %v and Status: %v \n", parsedData.Payment.Id, parsedData.Payment.Status)
 
 	fmt.Println("")
+
+	// TODO
+	// error handling
+	// return status
 }
