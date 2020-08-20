@@ -21,36 +21,43 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome in C&C server API\n")
 }
 
-func proxmoxProvisioningServerGetContainersHandler(w http.ResponseWriter, r *http.Request) {
-	//var response []byte
-	//response = []"getting containers from proxmox.."
-	//fmt.Fprintf(w, "selected proxmox..")
-
-	//var body string
-	//body = "getting containers from proxmox.."
-	//io.WriteString(w, fmt.Sprintf("%s", body))
-
+func proxmoxProvisioningServerGetContainerHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "getting containers from proxmox..\n")
 	fmt.Fprintf(w, "selected proxmox..\n")
 
 	tracer := opentracing.GlobalTracer()
-	_, rs := proxmoxProvisioningServerGetContainersClient(tracer)
-	fmt.Fprintf(w, "returned: s%\n", rs)
+	_, rs := proxmoxProvisioningServerClient(tracer, "getall")
+	fmt.Fprintf(w, "returned: %s\n", rs)
 
+}
+
+func proxmoxProvisioningServerContainerCreateHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "create container on proxmox..\n")
+
+	tracer := opentracing.GlobalTracer()
+	_, rs := proxmoxProvisioningServerClient(tracer, "create")
+	fmt.Fprintf(w, "returned: %s\n", rs)
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
 
-func proxmoxProvisioningServerGetContainersClient(tracer opentracing.Tracer) (bool, string) {
-	var client = "client"
+func proxmoxProvisioningServerClient(tracer opentracing.Tracer, action string) (bool, string) {
+	var (
+		client            = "proxmoxProvisioningServerClient"
+		requestBodyCreate = "{ \"disk\": 20}"
+		req               *http.Request
+		err               error
+	)
+
 	// nethttp.Transport from go-stdlib will do the tracing
 	c := &http.Client{Transport: &nethttp.Transport{}}
 
@@ -60,13 +67,29 @@ func proxmoxProvisioningServerGetContainersClient(tracer opentracing.Tracer) (bo
 	defer span.Finish()
 	ctx := opentracing.ContextWithSpan(context.Background(), span)
 
-	req, err := http.NewRequest(
-		"GET",
-		fmt.Sprintf("http://192.168.121.10:%s/", "4567"),
-		nil,
-	)
-	if err != nil {
-		onError(span, err)
+	if action == "getall" {
+		req, err = http.NewRequest(
+			"GET",
+			fmt.Sprintf("http://192.168.121.10:%s", "4567"),
+			nil,
+		)
+		if err != nil {
+			onError(span, err)
+			return false, ""
+		}
+	} else if action == "create" {
+
+		req, err = http.NewRequest(
+			"POST",
+			fmt.Sprintf("http://192.168.121.10:%s%s", "4567", "/api/containers/create"),
+			strings.NewReader(requestBodyCreate),
+		)
+		if err != nil {
+			onError(span, err)
+			return false, ""
+		}
+	} else {
+		// no action selected
 		return false, ""
 	}
 
@@ -149,7 +172,9 @@ func main() {
 
 	router.HandleFunc("/", homeLinkHandler)
 
-	router.HandleFunc("/proxmox-provisioning-server/containers/all", proxmoxProvisioningServerGetContainersHandler)
+	router.HandleFunc("/proxmox-provisioning-server/container/all", proxmoxProvisioningServerGetContainerHandler)
+
+	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmoxProvisioningServerContainerCreateHandler)
 
 	router.Handle("/calculoid/webhook", calculoidHandler.CalculoidWebhook())
 
