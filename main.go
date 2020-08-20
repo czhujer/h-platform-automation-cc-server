@@ -4,14 +4,13 @@ import (
 	"cc-server/calculoid"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
+	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-lib/metrics/prometheus"
-	"time"
 	//"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/opentracing-contrib/go-gorilla/gorilla"
 	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-client-go/log"
 	"log"
@@ -32,7 +31,6 @@ func main() {
 
 	// http listen port
 	const httpAddress = ":8080"
-	const jaegerHostPort = ":6831"
 
 	filename := os.Args[0]
 	var opts prometheusmiddleware.Opts
@@ -43,18 +41,21 @@ func main() {
 
 	calculoidHandler := &calculoid.Handler{}
 
-	tracingcfg := jaegercfg.Configuration{
-		ServiceName: "c-and-c-server",
-		Sampler: &jaegercfg.SamplerConfig{
-			Type:  jaeger.SamplerTypeConst,
-			Param: 1,
-		},
-		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans:            true,
-			BufferFlushInterval: 1 * time.Second,
-			LocalAgentHostPort:  jaegerHostPort,
-		},
+	tracingcfg, err := jaegercfg.FromEnv()
+	if err != nil {
+		log.Printf("Could not parse Jaeger env vars: %s", err.Error())
+		return
 	}
+
+	if tracingcfg.ServiceName == "" {
+		tracingcfg.ServiceName = "c-and-c-server"
+	}
+	log.Printf("Jaeger ServiceName: %s", tracingcfg.ServiceName)
+	log.Printf("Jaeger LocalAgentHostPort: %s", tracingcfg.Reporter.LocalAgentHostPort)
+
+	tracingcfg.Sampler.Type = jaeger.SamplerTypeConst
+	tracingcfg.Sampler.Param = 1
+	tracingcfg.Reporter.LogSpans = true
 
 	jLogger := jaegerlog.StdLogger
 	jMetricsFactory := prometheus.New()
@@ -65,7 +66,7 @@ func main() {
 		jaegercfg.Metrics(jMetricsFactory),
 	)
 	if err != nil {
-		log.Fatal("cannot initialize Jaeger Tracer", err)
+		log.Fatal("cannot initialize Jaeger Tracer: ", err)
 	}
 
 	// Set the singleton opentracing.Tracer with the Jaeger tracer.
