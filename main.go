@@ -29,18 +29,15 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	// http listen port
 	const httpAddress = ":8080"
-
-	filename := os.Args[0]
+	var filename = os.Args[0]
 	var opts prometheusmiddleware.Opts
 
 	log.Printf("starting %s \n", filename)
 
 	middleware := prometheusmiddleware.NewPrometheusMiddleware(opts)
 
-	calculoidHandler := &calculoid.Handler{}
-
+	// Initialize tracer with a logger and a metrics factory
 	tracingcfg, err := jaegercfg.FromEnv()
 	if err != nil {
 		log.Printf("Could not parse Jaeger env vars: %s", err.Error())
@@ -60,7 +57,6 @@ func main() {
 	jLogger := jaegerlog.StdLogger
 	jMetricsFactory := prometheus.New()
 
-	// Initialize tracer with a logger and a metrics factory
 	tracer, closer, err := tracingcfg.NewTracer(
 		jaegercfg.Logger(jLogger),
 		jaegercfg.Metrics(jMetricsFactory),
@@ -77,6 +73,8 @@ func main() {
 	router.Use(middleware.InstrumentHandlerDuration)
 
 	// handlers
+	calculoidHandler := &calculoid.Handler{}
+
 	router.Path("/metrics").Handler(promhttp.Handler())
 
 	router.HandleFunc("/", homeLinkHandler)
