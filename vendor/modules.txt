@@ -10,8 +10,6 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/gorilla/handlers v1.4.2
-github.com/gorilla/handlers
 # github.com/gorilla/mux v1.7.4
 github.com/gorilla/mux
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
@@ -61,6 +59,7 @@ github.com/uber/jaeger-client-go/transport
 github.com/uber/jaeger-client-go/utils
 # github.com/uber/jaeger-lib v2.2.0+incompatible
 github.com/uber/jaeger-lib/metrics
+github.com/uber/jaeger-lib/metrics/prometheus
 # go.uber.org/atomic v1.6.0
 go.uber.org/atomic
 # golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1

@@ -4,6 +4,8 @@ import (
 	"cc-server/calculoid"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
+	"github.com/uber/jaeger-lib/metrics/prometheus"
+	"time"
 	//"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/opentracing-contrib/go-gorilla/gorilla"
@@ -11,10 +13,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
+	jaegerlog "github.com/uber/jaeger-client-go/log"
 	"log"
 	"net/http"
 	"os"
-	//jaegerlog "github.com/uber/jaeger-client-go/log"
 )
 
 func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +29,11 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	// http listen port
+	const httpAddress = ":8080"
+	const jaegerHostPort = ":6831"
+
 	filename := os.Args[0]
 	var opts prometheusmiddleware.Opts
 
@@ -36,47 +43,37 @@ func main() {
 
 	calculoidHandler := &calculoid.Handler{}
 
-	jaegercfg := jaegercfg.Configuration{
+	tracingcfg := jaegercfg.Configuration{
 		ServiceName: "c-and-c-server",
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans: true,
+			LogSpans:            true,
+			BufferFlushInterval: 1 * time.Second,
+			LocalAgentHostPort:  jaegerHostPort,
 		},
 	}
 
-	//jLogger := jaegerlog.StdLogger
-	//jMetricsFactory := metrics.NullFactory
+	jLogger := jaegerlog.StdLogger
+	jMetricsFactory := prometheus.New()
 
 	// Initialize tracer with a logger and a metrics factory
-	tracer, closer, err := jaegercfg.NewTracer(
-	//jaegercfg.Logger(jLogger),
-	//jaegercfg.Metrics(jMetricsFactory),
+	tracer, closer, err := tracingcfg.NewTracer(
+		jaegercfg.Logger(jLogger),
+		jaegercfg.Metrics(jMetricsFactory),
 	)
+	if err != nil {
+		log.Fatal("cannot initialize Jaeger Tracer", err)
+	}
+
 	// Set the singleton opentracing.Tracer with the Jaeger tracer.
 	opentracing.SetGlobalTracer(tracer)
 	defer closer.Close()
 
-	//tracer := opentracing.Tracer()
-	//if err != nil {
-	//	log.Fatal("cannot initialize Jaeger Tracer", err)
-	//}
-
-	//okHandler := func(w http.ResponseWriter, r *http.Request) {
-	//	// do something
-	//	data := "Hello"
-	//	fmt.Fprintf(w, data)
-	//}
-
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(middleware.InstrumentHandlerDuration)
-
-	//tracingmiddleware := gorilla.Middleware(
-	//	tracer,
-	//	http.HandlerFunc(homeLinkHandler),
-	//)
 
 	router.Path("/metrics").Handler(promhttp.Handler())
 
@@ -98,7 +95,9 @@ func main() {
 	//loggedRouter := handlers.CombinedLoggingHandler(os.Stdout, router)
 
 	// start server
-	err = http.ListenAndServe(":8080", router)
+	err = http.ListenAndServe(
+		httpAddress,
+		router)
 	if err != nil {
 		panic(err)
 	}
