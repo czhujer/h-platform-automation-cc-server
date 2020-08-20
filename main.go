@@ -4,7 +4,7 @@ import (
 	"cc-server/calculoid"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
-	"github.com/gorilla/handlers"
+	//"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/opentracing-contrib/go-gorilla/gorilla"
 	"github.com/opentracing/opentracing-go"
@@ -95,10 +95,10 @@ func main() {
 	})
 
 	// Add apache-like logging to all routes
-	loggedRouter := handlers.CombinedLoggingHandler(os.Stdout, router)
+	//loggedRouter := handlers.CombinedLoggingHandler(os.Stdout, router)
 
 	// start server
-	err = http.ListenAndServe(":8080", loggedRouter)
+	err = http.ListenAndServe(":8080", router)
 	if err != nil {
 		panic(err)
 	}
