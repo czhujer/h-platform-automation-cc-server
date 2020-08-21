@@ -9,7 +9,7 @@ import (
 
 func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO
-	// add json headers
+	// set content-type to json
 
 	// TODO
 	// add input params
@@ -23,7 +23,20 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 		// TODO
 		// add err
 		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "getall", proxmoxServer)
-		fmt.Fprintf(w, "returned: %s\n", rs)
+
+		// TODO
+		// format return data by returned contentType
+		// contentType := r.Header.Get("Content-type")
+		// log.Printf("returned contentType %s", contentType)
+		//if contentType == "text/plain" {
+		//	fmt.Fprintf(w, "returned: %s\n", rs)
+		//} else if contentType == "application/json" {
+		//	fmt.Fprintf(w, "returned: %s\n", rs)
+		//} else {
+		//}
+
+		fmt.Fprintf(w, "returned body: %s\n", rs)
+
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -35,7 +48,9 @@ func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseW
 
 	// TODO
 	// add input params
-	//     proxmoxServer
+	//     proxmoxServer require
+	//     disk, ram - one of this is required
+
 	proxmoxServer = "192.168.121.10"
 	tracer := opentracing.GlobalTracer()
 
