@@ -20,6 +20,8 @@ import (
 )
 
 func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO
+	// add html template
 	fmt.Fprintf(w, "Welcome in C&C server API\n")
 }
 
@@ -81,11 +83,16 @@ func main() {
 
 	router.HandleFunc("/", homeLinkHandler)
 
+	// v1-arch handlers
+	router.Handle("/calculoid/webhook", calculoid.CalculoidWebhookHandler())
+
+	// v2-arch handlers
 	router.HandleFunc("/proxmox-provisioning-server/container/all", proxmox.ProvisioningServerGetContainerHandler)
 
 	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmox.PovisioningServerContainerCreateHandler)
 
-	router.Handle("/calculoid/webhook", calculoid.CalculoidWebhookHandler())
+	// TODO
+	// add terraform handlers
 
 	// default handler
 	notFoundHandlermw := gorilla.Middleware(
