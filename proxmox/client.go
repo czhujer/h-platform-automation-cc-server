@@ -33,7 +33,7 @@ func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Trace
 	if action == "getall" {
 		req, err = http.NewRequest(
 			"GET",
-			fmt.Sprintf("http://192.168.121.10:%s", "4567"),
+			fmt.Sprintf("http://192.168.121.10:%s%s", "4567", "/api/containers"),
 			nil,
 		)
 		if err != nil {
