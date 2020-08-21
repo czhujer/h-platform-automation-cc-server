@@ -48,7 +48,7 @@ func (c *Handler) queryParams(w http.ResponseWriter, r *http.Request) {
 	//log.Printf("received data: %s \n", receivedData)
 }
 
-func (c *Handler) CalculoidWebhook() http.HandlerFunc {
+func (c *Handler) CalculoidWebhookHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		code := http.StatusBadRequest
