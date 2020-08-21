@@ -3,6 +3,7 @@ package proxmox
 import (
 	"fmt"
 	"github.com/opentracing/opentracing-go"
+	"log"
 	"net/http"
 )
 
@@ -11,18 +12,21 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 	// add json headers
 
 	// TODO
-	// add get/post check
-
-	fmt.Fprintf(w, "getting containers from proxmox..\n")
-	fmt.Fprintf(w, "selected proxmox..\n")
-
+	// add input params
+	//     proxmoxServer
+	proxmoxServer = "192.168.121.10"
 	tracer := opentracing.GlobalTracer()
 
-	// TODO
-	// add err
-	_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "getall")
-	fmt.Fprintf(w, "returned: %s\n", rs)
+	log.Printf("getting all containers from proxmox")
 
+	if r.Method == "GET" {
+		// TODO
+		// add err
+		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "getall", proxmoxServer)
+		fmt.Fprintf(w, "returned: %s\n", rs)
+	} else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
 }
 
 func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,14 +34,19 @@ func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseW
 	// add json headers
 
 	// TODO
-	// add get/post check
-
-	fmt.Fprintf(w, "create container on proxmox..\n")
-
+	// add input params
+	//     proxmoxServer
+	proxmoxServer = "192.168.121.10"
 	tracer := opentracing.GlobalTracer()
 
-	// TODO
-	// check err
-	_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "create")
-	fmt.Fprintf(w, "returned: %s\n", rs)
+	log.Printf("create container on proxmox")
+
+	if r.Method == "GET" {
+		// TODO
+		// check err
+		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "create", proxmoxServer)
+		fmt.Fprintf(w, "returned: %s\n", rs)
+	} else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
 }

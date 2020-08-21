@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Tracer, action string) (bool, string) {
+func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Tracer, action string, proxmoxServer string) (bool, string) {
 	var (
 		client            = "proxmoxProvisioningServerClient"
 		requestBodyCreate = "{ \"disk\": 20}"
@@ -33,7 +33,7 @@ func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Trace
 	if action == "getall" {
 		req, err = http.NewRequest(
 			"GET",
-			fmt.Sprintf("http://192.168.121.10:%s%s", "4567", "/api/containers"),
+			fmt.Sprintf("http://%s:%s%s", proxmoxServer, "4567", "/api/containers"),
 			nil,
 		)
 		if err != nil {
@@ -44,7 +44,7 @@ func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Trace
 
 		req, err = http.NewRequest(
 			"POST",
-			fmt.Sprintf("http://192.168.121.10:%s%s", "4567", "/api/containers/create"),
+			fmt.Sprintf("http://%s:%s%s", proxmoxServer, "4567", "/api/containers/create"),
 			strings.NewReader(requestBodyCreate),
 		)
 		if err != nil {
@@ -72,7 +72,7 @@ func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Trace
 		proxmox.onError(span, err)
 		return false, ""
 	}
-	fmt.Printf("Received result: %s\n", string(body))
+	log.Printf("Received result: %s\n", string(body))
 	return true, string(body)
 }
 
