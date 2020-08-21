@@ -6,9 +6,6 @@ import (
 	"net/http"
 )
 
-type Proxmox struct {
-}
-
 func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "getting containers from proxmox..\n")
 	fmt.Fprintf(w, "selected proxmox..\n")
