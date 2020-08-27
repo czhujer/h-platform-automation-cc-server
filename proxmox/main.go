@@ -16,6 +16,10 @@ const defaultProxmoxServer = "192.168.121.10"
 
 func getProxmoxUrl(r *http.Request) string {
 	param := "proxmoxUrl"
+
+	// TODO
+	// fix/add parsing param from POST
+
 	keys, ok := r.URL.Query()[param]
 
 	if !ok || len(keys[0]) < 1 {
