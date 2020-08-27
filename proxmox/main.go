@@ -10,7 +10,7 @@ import (
 type Proxmox struct {
 }
 
-type ProxmoxUrl struct {
+type ProxmoxUrlData struct {
 	ProxmoxUrl string `yaml:"proxmoxUrl"`
 }
 
@@ -25,7 +25,7 @@ func getProxmoxUrl(r *http.Request) string {
 	const param = "proxmoxUrl"
 
 	if r.Method == http.MethodPost {
-		var message ProxmoxUrl
+		var message ProxmoxUrlData
 
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields()
