@@ -10,7 +10,7 @@ import (
 type Proxmox struct {
 }
 
-type ProxmoxUrlData struct {
+type UrlInputData struct {
 	ProxmoxUrl string `yaml:"proxmoxUrl"`
 }
 
@@ -25,7 +25,7 @@ func getProxmoxUrl(r *http.Request) string {
 	const param = "proxmoxUrl"
 
 	if r.Method == http.MethodPost {
-		var message ProxmoxUrlData
+		var message UrlInputData
 
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields()
@@ -43,7 +43,7 @@ func getProxmoxUrl(r *http.Request) string {
 		key = message.ProxmoxUrl
 
 		if key == "" {
-			log.Printf("Url param '%s' (%s) is missing", param, r.Method)
+			log.Printf("input param '%s' (%s) is missing", param, r.Method)
 			return defaultProxmoxServer
 		}
 	} else {
@@ -51,13 +51,13 @@ func getProxmoxUrl(r *http.Request) string {
 		keys, ok := r.URL.Query()[param]
 
 		if !ok || len(keys[0]) < 1 {
-			log.Printf("Url param '%s' (%s) is missing", param, r.Method)
+			log.Printf("input param '%s' (%s) is missing", param, r.Method)
 			return defaultProxmoxServer
 		}
 		key = keys[0]
 	}
 
-	log.Printf("Url param \"%s\": %s", param, key)
+	log.Printf("input param \"%s\": %s", param, key)
 
 	return key
 }
