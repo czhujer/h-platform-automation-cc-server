@@ -46,14 +46,6 @@ func setProxmoxUrl(r *http.Request) (string, string, error) {
 	host = parsedUrl.Hostname()
 	port = parsedUrl.Port()
 
-	//log.Printf("parsedHost: ", parsedHost)
-
-	//host, port, _ := net.SplitHostPort(parsedHost)
-
-	//if err != nil {
-	//	log.Fatal("cannot set proxmox URL: ", err)
-	//	return "", "", err
-	//}
 	if port == "" {
 		port = "4567"
 	}
