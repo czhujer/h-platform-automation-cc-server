@@ -25,9 +25,9 @@ func getProxmoxUrl(r *http.Request) string {
 
 	key := keys[0]
 
-	log.Printf("Url Param 's%' is: "+string(key), param)
+	log.Printf("Url Param \"%s\" is: %s", param, key)
 
-	return string(key)
+	return key
 }
 
 func setProxmoxUrl(r *http.Request) (string, string, error) {
@@ -38,20 +38,22 @@ func setProxmoxUrl(r *http.Request) (string, string, error) {
 	)
 	proxmoxUrl = getProxmoxUrl(r)
 
-	// host, port, err := net.SplitHostPort(url)
-	// https://golang.org/pkg/net/url/#Parse
-	parsedUrl, err := url.Parse(proxmoxUrl)
+	parsedUrl, err := url.Parse("http://" + proxmoxUrl)
 	if err != nil {
-		log.Fatal("cannot parse proxmox hostname: ", err)
+		log.Fatal("cannot parse proxmox hostname and port: ", err)
 	}
 
 	host = parsedUrl.Hostname()
 	port = parsedUrl.Port()
 
-	if err != nil {
-		log.Fatal("cannot set proxmox URL: ", err)
-		return "", "", err
-	}
+	//log.Printf("parsedHost: ", parsedHost)
+
+	//host, port, _ := net.SplitHostPort(parsedHost)
+
+	//if err != nil {
+	//	log.Fatal("cannot set proxmox URL: ", err)
+	//	return "", "", err
+	//}
 	if port == "" {
 		port = "4567"
 	}

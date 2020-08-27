@@ -21,7 +21,7 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 
 	log.Printf("getting all containers from proxmox")
 
-	if r.Method == "GET" {
+	if r.Method == "GET" || r.Method == "POST" {
 		// TODO
 		// add err
 		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "getall", proxmoxServer, proxmoxPort)
