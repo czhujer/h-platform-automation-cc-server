@@ -13,8 +13,10 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 
 	// TODO
 	// add input params
-	//     proxmoxServer
-	proxmoxServer = "192.168.121.10"
+	//     proxmoxURL
+	//proxmoxServer, proxmoxPort = splitProxmoxUrl(mux.Vars(r)["proxmoxUrl"][0])
+	proxmoxServer, proxmoxPort, _ = setProxmoxUrl(r)
+
 	tracer := opentracing.GlobalTracer()
 
 	log.Printf("getting all containers from proxmox")
@@ -22,7 +24,7 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 	if r.Method == "GET" {
 		// TODO
 		// add err
-		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "getall", proxmoxServer)
+		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "getall", proxmoxServer, proxmoxPort)
 
 		// TODO
 		// format return data by returned contentType
@@ -48,10 +50,10 @@ func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseW
 
 	// TODO
 	// add input params
-	//     proxmoxServer require
 	//     disk, ram - one of this is required
 
-	proxmoxServer = "192.168.121.10"
+	proxmoxServer, proxmoxPort, _ = setProxmoxUrl(r)
+
 	tracer := opentracing.GlobalTracer()
 
 	log.Printf("create container on proxmox")
@@ -59,7 +61,7 @@ func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseW
 	if r.Method == "GET" {
 		// TODO
 		// check err
-		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "create", proxmoxServer)
+		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "create", proxmoxServer, proxmoxPort)
 		fmt.Fprintf(w, "returned: %s\n", rs)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)

@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Tracer, action string, proxmoxServer string) (bool, string) {
+func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Tracer, action string, server string, port string) (bool, string) {
 	var (
 		client            = "proxmoxProvisioningServerClient"
 		requestBodyCreate = "{ \"disk\": 20}"
@@ -33,7 +33,7 @@ func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Trace
 	if action == "getall" {
 		req, err = http.NewRequest(
 			"GET",
-			fmt.Sprintf("http://%s:%s%s", proxmoxServer, "4567", "/api/containers"),
+			fmt.Sprintf("http://%s:%s%s", server, port, "/api/containers"),
 			nil,
 		)
 		if err != nil {
@@ -44,7 +44,7 @@ func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Trace
 
 		req, err = http.NewRequest(
 			"POST",
-			fmt.Sprintf("http://%s:%s%s", proxmoxServer, "4567", "/api/containers/create"),
+			fmt.Sprintf("http://%s:%s%s", server, port, "/api/containers/create"),
 			strings.NewReader(requestBodyCreate),
 		)
 		if err != nil {
