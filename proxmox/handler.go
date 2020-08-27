@@ -14,7 +14,10 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 	// TODO
 	// add input params
 	//     proxmoxURL
-	//proxmoxServer, proxmoxPort = splitProxmoxUrl(mux.Vars(r)["proxmoxUrl"][0])
+
+	// TODO
+	// add check  r.Header.Get("Content-Type") == "application/json" if method is POST
+
 	proxmoxServer, proxmoxPort, _ = setProxmoxUrl(r)
 
 	tracer := opentracing.GlobalTracer()
@@ -51,6 +54,9 @@ func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseW
 	// TODO
 	// add input params
 	//     disk, ram - one of this is required
+
+	// TODO
+	// add check  r.Header.Get("Content-Type") == "application/json" if method is POST
 
 	proxmoxServer, proxmoxPort, _ = setProxmoxUrl(r)
 

@@ -1,12 +1,17 @@
 package proxmox
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/url"
 )
 
 type Proxmox struct {
+}
+
+type ProxmoxUrl struct {
+	ProxmoxUrl string `yaml:"proxmoxUrl"`
 }
 
 var proxmoxServer string
@@ -20,21 +25,29 @@ func getProxmoxUrl(r *http.Request) string {
 	const param = "proxmoxUrl"
 
 	if r.Method == http.MethodPost {
-		err := r.ParseForm()
-		if err != nil {
-			log.Fatal("cannot parse Form: ", err)
-		}
+		var message ProxmoxUrl
+
+		dec := json.NewDecoder(r.Body)
+		dec.DisallowUnknownFields()
 
 		// TODO
-		// fix empty map
-		log.Println(r.PostForm)
+		// fix rest of the unhandled cases
+		// https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
 
-		key = r.Form.Get(param)
+		err := dec.Decode(&message)
+		if err != nil {
+			log.Fatal("cannot decode body: ", err)
+			return defaultProxmoxServer
+		}
+
+		key = message.ProxmoxUrl
+
 		if key == "" {
 			log.Printf("Url param '%s' (%s) is missing", param, r.Method)
 			return defaultProxmoxServer
 		}
 	} else {
+		// GET method
 		keys, ok := r.URL.Query()[param]
 
 		if !ok || len(keys[0]) < 1 {
