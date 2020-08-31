@@ -8,68 +8,95 @@ import (
 )
 
 func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO
-	// set content-type to json
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != "GET" && r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	rContentType := r.Header.Get("Content-type")
+	log.Printf("request Content-type: %s", rContentType)
+
+	if rContentType != "application/json" {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		return
+	}
 
 	// TODO
 	// add input params
 	//     proxmoxURL
 
-	// TODO
-	// add check  r.Header.Get("Content-Type") == "application/json" if method is POST
-
 	proxmoxServer, proxmoxPort, _ = setProxmoxUrl(r)
 
 	tracer := opentracing.GlobalTracer()
 
-	log.Printf("getting all containers from proxmox")
+	log.Printf("getting all containers from (server: %s, port: %s)", proxmoxServer, proxmoxPort)
 
-	if r.Method == "GET" || r.Method == "POST" {
-		// TODO
-		// add err
-		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "getall", proxmoxServer, proxmoxPort)
+	status, rs := proxmox.proxmoxProvisioningServerClient(tracer, "getall", proxmoxServer, proxmoxPort)
+	if status != true {
+		w.WriteHeader(http.StatusInternalServerError)
 
-		// TODO
-		// format return data by returned contentType
-		// contentType := r.Header.Get("Content-type")
-		// log.Printf("returned contentType %s", contentType)
-		//if contentType == "text/plain" {
-		//	fmt.Fprintf(w, "returned: %s\n", rs)
-		//} else if contentType == "application/json" {
-		//	fmt.Fprintf(w, "returned: %s\n", rs)
-		//} else {
-		//}
+		log.Printf("get containers failed: %s", rs)
+		if isJSON(rs) {
+			fmt.Fprintf(w, "%s\n", rs)
+		} else {
+			fmt.Fprintf(w, "{\"returned_body\": \"%s\"}\n", rs)
+		}
 
-		fmt.Fprintf(w, "returned body: %s\n", rs)
+		return
+	}
 
+	if isJSON(rs) {
+		fmt.Fprintf(w, "%s\n", rs)
 	} else {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprintf(w, "{\"returned_body\": \"%s\", \"status:\": \"%s\"}\n", rs, status)
 	}
 }
 
 func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO
-	// add json headers
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	rContentType := r.Header.Get("Content-type")
+	log.Printf("request Content-type: %s", rContentType)
+
+	if rContentType != "application/json" {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		return
+	}
 
 	// TODO
 	// add input params
 	//     disk, ram - one of this is required
 
-	// TODO
-	// add check  r.Header.Get("Content-Type") == "application/json" if method is POST
-
 	proxmoxServer, proxmoxPort, _ = setProxmoxUrl(r)
 
 	tracer := opentracing.GlobalTracer()
 
-	log.Printf("create container on proxmox")
+	log.Printf("create container on proxmox.. (server: %s, port: %s, disk: , ram: )", proxmoxServer, proxmoxPort)
 
-	if r.Method == "GET" {
-		// TODO
-		// check err
-		_, rs := proxmox.proxmoxProvisioningServerClient(tracer, "create", proxmoxServer, proxmoxPort)
-		fmt.Fprintf(w, "returned: %s\n", rs)
+	status, rs := proxmox.proxmoxProvisioningServerClient(tracer, "create", proxmoxServer, proxmoxPort)
+	if status != true {
+		w.WriteHeader(http.StatusInternalServerError)
+
+		log.Printf("create container failed: %s", rs)
+		if isJSON(rs) {
+			fmt.Fprintf(w, "%s\n", rs)
+		} else {
+			fmt.Fprintf(w, "{\"returned\": \"%s\"}\n", rs)
+		}
+
+		return
+	}
+
+	if isJSON(rs) {
+		fmt.Fprintf(w, "%s\n", rs)
 	} else {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprintf(w, "{\"returned\": \"%s\"}\n", rs)
 	}
 }

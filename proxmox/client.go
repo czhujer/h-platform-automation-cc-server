@@ -67,13 +67,23 @@ func (proxmox *Proxmox) proxmoxProvisioningServerClient(tracer opentracing.Trace
 		return false, ""
 	}
 	defer res.Body.Close()
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		proxmox.onError(span, err)
 		return false, ""
 	}
-	log.Printf("Received result: %s\n", string(body))
-	return true, string(body)
+
+	statusOK := res.StatusCode >= 200 && res.StatusCode < 300
+	if !statusOK {
+		log.Printf("Received Non-OK HTTP status: %s\n", res.StatusCode)
+
+		log.Printf("Received result: %s\n", string(body))
+		return false, string(body)
+	} else {
+		log.Printf("Received result: %s\n", string(body))
+		return true, string(body)
+	}
 }
 
 func (proxmox *Proxmox) onError(span opentracing.Span, err error) {

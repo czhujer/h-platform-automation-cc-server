@@ -86,3 +86,8 @@ func setProxmoxUrl(r *http.Request) (string, string, error) {
 	}
 	return host, port, nil
 }
+
+func isJSON(str string) bool {
+	var js json.RawMessage
+	return json.Unmarshal([]byte(str), &js) == nil
+}
