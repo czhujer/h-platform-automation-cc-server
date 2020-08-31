@@ -22,7 +22,7 @@ Command and Control server for whole platform
 - https://github.com/opentracing-contrib/go-gorilla/blob/master/gorilla/example_test.go
 - https://medium.com/@carlosedp/instrumenting-go-for-tracing-c5bdabe1fc81
 
-## commands
+## testing commands
 ```
 curl  -d '{"key1":"value1", "key2":"value2"}' -H "Content-Type: application/json" -X POST 127.0.0.1:8080/calculoid/webhook -i
 ```
