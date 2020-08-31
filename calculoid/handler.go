@@ -70,7 +70,7 @@ func (c *Handler) CalculoidWebhookHandler() http.HandlerFunc {
 			c.calculoidWebhookParser()
 
 			// TODO
-			// missing http code handling with correspondig status with c.calculoidWebhookParser()
+			// missing http code handling with corresponding status with c.calculoidWebhookParser()
 
 		} else {
 			w.WriteHeader(code)
