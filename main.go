@@ -2,6 +2,7 @@ package main
 
 import (
 	"cc-server/calculoid"
+	"cc-server/proxmox"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
 	"github.com/gorilla/handlers"
@@ -19,28 +20,26 @@ import (
 )
 
 func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "")
+	// TODO
+	// add html template
+	fmt.Fprintf(w, "Welcome in C&C server API\n")
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintf(w, "")
 }
 
 func main() {
 
-	// http listen port
 	const httpAddress = ":8080"
-
-	filename := os.Args[0]
+	var filename = os.Args[0]
 	var opts prometheusmiddleware.Opts
 
 	log.Printf("starting %s \n", filename)
 
 	middleware := prometheusmiddleware.NewPrometheusMiddleware(opts)
 
-	calculoidHandler := &calculoid.Handler{}
-
+	// Initialize tracer with a logger and a metrics factory
 	tracingcfg, err := jaegercfg.FromEnv()
 	if err != nil {
 		log.Printf("Could not parse Jaeger env vars: %s", err.Error())
@@ -60,7 +59,6 @@ func main() {
 	jLogger := jaegerlog.StdLogger
 	jMetricsFactory := prometheus.New()
 
-	// Initialize tracer with a logger and a metrics factory
 	tracer, closer, err := tracingcfg.NewTracer(
 		jaegercfg.Logger(jLogger),
 		jaegercfg.Metrics(jMetricsFactory),
@@ -77,11 +75,24 @@ func main() {
 	router.Use(middleware.InstrumentHandlerDuration)
 
 	// handlers
+	calculoid := &calculoid.Handler{}
+
+	proxmox := &proxmox.Proxmox{}
+
 	router.Path("/metrics").Handler(promhttp.Handler())
 
 	router.HandleFunc("/", homeLinkHandler)
 
-	router.Handle("/calculoid/webhook", calculoidHandler.CalculoidWebhook())
+	// v1-arch handlers
+	router.Handle("/calculoid/webhook", calculoid.CalculoidWebhookHandler())
+
+	// v2-arch handlers
+	router.HandleFunc("/proxmox-provisioning-server/container/all", proxmox.ProvisioningServerGetContainerHandler)
+
+	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmox.PovisioningServerContainerCreateHandler)
+
+	// TODO
+	// add terraform handlers
 
 	// default handler
 	notFoundHandlermw := gorilla.Middleware(
