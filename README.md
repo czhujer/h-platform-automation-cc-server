@@ -21,12 +21,15 @@ Command and Control server for whole platform
 #### metrics
 - https://www.robustperception.io/prometheus-middleware-for-gorilla-mux
 
-### tracing
+#### tracing
 - https://opentracing.io/guides/golang/quick-start/
 - https://medium.com/opentracing/tracing-http-request-latency-in-go-with-opentracing-7cc1282a100a
 - https://github.com/opentracing-contrib/go-gorilla
 - https://github.com/opentracing-contrib/go-gorilla/blob/master/gorilla/example_test.go
 - https://medium.com/@carlosedp/instrumenting-go-for-tracing-c5bdabe1fc81
+
+#### ssh
+- https://gist.github.com/svett/b7f56afc966a6b6ac2fc
 
 ## testing commands
 ```

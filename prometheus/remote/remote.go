@@ -123,28 +123,32 @@ func (client *SSHClient) newSession() (*ssh.Session, error) {
 	return session, nil
 }
 
-func publicKeyFile(file string) ssh.AuthMethod {
+func publicKeyFile(prometheusServer string, prometheusPort int, file string) ssh.AuthMethod {
 	buffer, err := ioutil.ReadFile(file)
 	if err != nil {
+		log.Printf("prometheusRemote: [%s:%d] publicKey read failed: %s\n", prometheusServer, prometheusPort, err)
 		return nil
 	}
 
 	key, err := ssh.ParsePrivateKey(buffer)
 	if err != nil {
+		log.Printf("prometheusRemote: [%s:%d] publicKey parse failed: %s\n", prometheusServer, prometheusPort, err)
 		return nil
 	}
 	return ssh.PublicKeys(key)
 }
 
 func AddTarget() error {
+
+	pubKeyRs := publicKeyFile(defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey)
+	if pubKeyRs == nil {
+		return fmt.Errorf("prometheusRemote: [%s:%d] unable to load publicKeyFile: %s", defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey)
+	}
+
 	sshConfig := &ssh.ClientConfig{
 		User: defaultPrometheusUser,
 		Auth: []ssh.AuthMethod{
-			// TODO
-			// fix "runtime error: invalid memory address or nil pointer dereference"
-			// with pubKeyFile
-			//publicKeyFile(ccServerSshKey),
-			ssh.Password("password"),
+			publicKeyFile(defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey),
 		},
 		// TODO
 		// add check ssh fingerprint
