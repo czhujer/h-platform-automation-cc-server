@@ -12,6 +12,12 @@ Command and Control server for whole platform
 - https://www.alexedwards.net/blog/making-and-using-middleware
 - https://gowebexamples.com/advanced-middleware/
 
+#### http
+- https://medium.com/@vivek_syngh/http-response-in-golang-4ca1b3688d6
+
+#### html templating
+- https://golang.org/doc/articles/wiki/#tmp_6
+
 #### metrics
 - https://www.robustperception.io/prometheus-middleware-for-gorilla-mux
 
