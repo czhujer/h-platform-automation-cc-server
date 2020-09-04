@@ -99,4 +99,8 @@ func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseW
 	} else {
 		fmt.Fprintf(w, "{\"returned\": \"%s\"}\n", rs)
 	}
+
+	//TODO
+	// add monitoring target(s)/placeholder(s)
+	// prometheusRemote.AddTarget()
 }

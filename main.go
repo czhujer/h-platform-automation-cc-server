@@ -2,6 +2,7 @@ package main
 
 import (
 	"cc-server/calculoid"
+	prometheusRemote "cc-server/prometheus/remote"
 	"cc-server/proxmox"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
@@ -23,6 +24,18 @@ func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO
 	// add html template
 	fmt.Fprintf(w, "Welcome in C&C server API\n")
+}
+
+func prometheusRemoteTargetAddHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	err := prometheusRemote.AddTarget()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
+	} else {
+		fmt.Fprintf(w, "{\"result\": \"prometheus target added\"}\n")
+	}
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +106,10 @@ func main() {
 
 	// TODO
 	// add terraform handlers
+
+	// TODO
+	// add monitoring handlers
+	router.HandleFunc("/prometheus/remote/target/add", prometheusRemoteTargetAddHandler)
 
 	// default handler
 	notFoundHandlermw := gorilla.Middleware(
