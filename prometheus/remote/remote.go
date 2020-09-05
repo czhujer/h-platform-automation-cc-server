@@ -15,7 +15,7 @@ const defaultPrometheusPort = 22
 const defaultPrometheusUser = "hpa-remote-executor"
 const ccServerSshKey = "/root/.ssh/id_rsa"
 
-// TODO
+//TODO
 // remove hardcoded vmNameFull
 const vmNameFull = "oc-306.hcloud.cz"
 
@@ -171,7 +171,7 @@ func AddTarget() error {
 		Auth: []ssh.AuthMethod{
 			publicKeyFile(defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey),
 		},
-		// TODO
+		//TODO
 		// add check ssh fingerprint
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
@@ -210,7 +210,7 @@ func AddTarget() error {
 		log.Printf("prometheusRemote: [%s:%d] Stdout: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStdoutString)
 		log.Printf("prometheusRemote: [%s:%d] Stderr: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStderrString)
 
-		// TODO
+		//TODO
 		// return cmdStdoutString, cmdStderrString
 
 		if err != nil {
@@ -222,7 +222,7 @@ func AddTarget() error {
 }
 
 func RemoveTarget() error {
-	// TODO
+	//TODO
 	// add logic
 
 	return nil

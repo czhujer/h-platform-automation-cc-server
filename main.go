@@ -23,7 +23,7 @@ import (
 )
 
 func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	//TODO
 	// add html template
 	fmt.Fprintf(w, "Welcome in C&C server API\n")
 }
@@ -31,10 +31,10 @@ func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
 func prometheusRemoteTargetAddHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// TODO
+	//TODO
 	// check if request is GET/POST
 
-	// TODO
+	//TODO
 	// add loading/generating vmNameFull variable
 
 	err := prometheusRemote.AddTarget()
@@ -49,10 +49,10 @@ func prometheusRemoteTargetAddHandler(w http.ResponseWriter, r *http.Request) {
 func prometheusRemoteTargetRemoveHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// TODO
+	//TODO
 	// check if request is POST
 
-	// TODO
+	//TODO
 	// add loading vmNameFull variable from request
 
 	err := prometheusRemote.RemoveTarget()
@@ -67,10 +67,10 @@ func prometheusRemoteTargetRemoveHandler(w http.ResponseWriter, r *http.Request)
 func terraformOwncloudstackCreateHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// TODO
+	//TODO
 	// check if request is GET/POST
 
-	// TODO
+	//TODO
 	// add loading/generating vmNameFull variable
 
 	err := terraform.Show()
