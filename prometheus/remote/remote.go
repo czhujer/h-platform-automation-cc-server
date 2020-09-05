@@ -203,6 +203,7 @@ func AddTarget() error {
 		cmdStderrString = cmdStderr.String()
 
 		// serialize multiline output into one line output
+		// https://github.com/bored-engineer/ssh/commit/c1e5782a7327a7b87b17dd6035df4d463dd32689
 		cmdStdoutString = strings.ReplaceAll(cmdStdoutString, "\r\n", `\n`)
 		cmdStderrString = strings.ReplaceAll(cmdStderrString, "\r\n", `\n`)
 
