@@ -8,7 +8,8 @@ import (
 )
 
 // TODO
-// generate oc-xoy.trvars
+// generate oc-xyz.tfvars
+//
 // example:
 // vmname = "oc-xyz"
 // vmip = "10.1.2.4"
@@ -32,13 +33,16 @@ func Create() error {
 	}
 
 	// TODO
-	// add options for oc.var
+	// add PlanOptions for oc-xyz.tfvars
 
 	rs, err := tf.Plan(context.Background())
 	if err != nil {
 		log.Printf("terraform: plan error: %s", err)
 		return err
 	}
+
+	// TODO
+	// add terraform apply
 
 	fmt.Println(rs)
 
