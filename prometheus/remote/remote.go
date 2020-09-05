@@ -15,6 +15,12 @@ const defaultPrometheusPort = 22
 const defaultPrometheusUser = "hpa-remote-executor"
 const ccServerSshKey = "/root/.ssh/id_rsa"
 
+// TODO
+// remove hardcoded vmNameFull
+const vmNameFull = "oc-306.hcloud.cz"
+
+var monitoringTypes []string
+
 type SSHCommand struct {
 	Path   string
 	Env    []string
@@ -27,6 +33,14 @@ type SSHClient struct {
 	Config *ssh.ClientConfig
 	Host   string
 	Port   int
+}
+
+func loadMonitoringTypes() {
+	monitoringTypes = append(monitoringTypes, "prom-file-sd-node-ocb2c")
+	monitoringTypes = append(monitoringTypes, "prom-file-sd-mysql-ocb2c")
+	monitoringTypes = append(monitoringTypes, "prom-file-sd-apache-ocb2c")
+	monitoringTypes = append(monitoringTypes, "prom-file-sd-redis-ocb2c")
+	monitoringTypes = append(monitoringTypes, "prom-file-sd-php-fpm-ocb2c")
 }
 
 func (client *SSHClient) runCommand(cmd *SSHCommand) error {
@@ -137,8 +151,15 @@ func publicKeyFile(prometheusServer string, prometheusPort int, file string) ssh
 }
 
 func AddTarget() error {
+	var err error
+	var returnErr error
+	var cmd *SSHCommand
 	var cmdStdout bytes.Buffer
 	var cmdStderr bytes.Buffer
+	var cmdStdoutString string
+	var cmdStderrString string
+
+	returnErr = nil
 
 	pubKeyRs := publicKeyFile(defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey)
 	if pubKeyRs == nil {
@@ -161,35 +182,42 @@ func AddTarget() error {
 		Port:   defaultPrometheusPort,
 	}
 
-	cmd := &SSHCommand{
-		Path:   "prom-file-sd-node-ocb2c oc-101.hcloud.cz",
-		Stdout: &cmdStdout,
-		Stderr: &cmdStderr,
-	}
+	loadMonitoringTypes()
+	for _, monType := range monitoringTypes {
+		//fmt.Println(monType)
+		cmdStdout.Reset()
+		cmdStderr.Reset()
+		cmdStdoutString = ""
+		cmdStderrString = ""
 
-	log.Printf("prometheusRemote: [%s:%d] running command: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmd.Path)
-	err := client.runCommand(cmd)
+		cmd = &SSHCommand{
+			Path:   fmt.Sprintf("%s %s", monType, vmNameFull),
+			Stdout: &cmdStdout,
+			Stderr: &cmdStderr,
+		}
 
-	cmdStdoutString := cmdStdout.String()
-	cmdStderrString := cmdStderr.String()
+		log.Printf("prometheusRemote: [%s:%d] running command: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmd.Path)
+		err = client.runCommand(cmd)
 
-	// TODO
-	// serialize multiline output into one line output
-	// code below generates wrong order of bytes, or something like that
-	//cmdStdoutString = strings.ReplaceAll(cmdStdoutString, "\n", `\n`)
-	//cmdStderrString = strings.ReplaceAll(cmdStderrString, "\n", `\n`)
+		cmdStdoutString = cmdStdout.String()
+		cmdStderrString = cmdStderr.String()
 
-	log.Printf("prometheusRemote: [%s:%d] Stdout: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStdoutString)
-	log.Printf("prometheusRemote: [%s:%d] Stderr: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStderrString)
+		// serialize multiline output into one line output
+		cmdStdoutString = strings.ReplaceAll(cmdStdoutString, "\r\n", `\n`)
+		cmdStderrString = strings.ReplaceAll(cmdStderrString, "\r\n", `\n`)
 
-	if err != nil {
-		log.Printf("prometheusRemote: [%s:%d] command run error: %s\n", defaultPrometheusServer, defaultPrometheusPort, err)
-		return err
-	} else {
+		log.Printf("prometheusRemote: [%s:%d] Stdout: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStdoutString)
+		log.Printf("prometheusRemote: [%s:%d] Stderr: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStderrString)
+
 		// TODO
 		// return cmdStdoutString, cmdStderrString
-		return nil
+
+		if err != nil {
+			log.Printf("prometheusRemote: [%s:%d] command run error: %s\n", defaultPrometheusServer, defaultPrometheusPort, err)
+			returnErr = err
+		}
 	}
+	return returnErr
 }
 
 func RemoveTarget() error {
