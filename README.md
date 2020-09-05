@@ -31,6 +31,11 @@ Command and Control server for whole platform
 #### ssh
 - https://gist.github.com/svett/b7f56afc966a6b6ac2fc
 
+#### terraform
+- https://pkg.go.dev/os/exec?tab=doc
+- https://gobyexample.com/execing-processes
+- https://github.com/hashicorp/terraform-exec
+
 ## testing commands
 ```
 curl  -d '{"key1":"value1", "key2":"value2"}' -H "Content-Type: application/json" -X POST 127.0.0.1:8080/calculoid/webhook -i
