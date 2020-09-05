@@ -2,6 +2,7 @@ package main
 
 import (
 	"cc-server/calculoid"
+	prometheusRemote "cc-server/prometheus/remote"
 	"cc-server/proxmox"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
@@ -23,6 +24,42 @@ func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO
 	// add html template
 	fmt.Fprintf(w, "Welcome in C&C server API\n")
+}
+
+func prometheusRemoteTargetAddHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// TODO
+	// check if request is GET/POST
+
+	// TODO
+	// add loading/generating vmNameFull variable
+
+	err := prometheusRemote.AddTarget()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
+	} else {
+		fmt.Fprintf(w, "{\"result\": \"prometheus target added\"}\n")
+	}
+}
+
+func prometheusRemoteTargetRemoveHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// TODO
+	// check if request is POST
+
+	// TODO
+	// add loading vmNameFull variable from request
+
+	err := prometheusRemote.RemoveTarget()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
+	} else {
+		fmt.Fprintf(w, "{\"result\": \"prometheus target removed\"}\n")
+	}
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -90,6 +127,10 @@ func main() {
 	router.HandleFunc("/proxmox-provisioning-server/container/all", proxmox.ProvisioningServerGetContainerHandler)
 
 	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmox.PovisioningServerContainerCreateHandler)
+
+	// monitoring handlers
+	router.HandleFunc("/prometheus/remote/target/add", prometheusRemoteTargetAddHandler)
+	router.HandleFunc("/prometheus/remote/target/remove", prometheusRemoteTargetRemoveHandler)
 
 	// TODO
 	// add terraform handlers
