@@ -1,18 +1,18 @@
 package remote
 
 import (
+	"bytes"
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 )
 
 const defaultPrometheusServer = "192.168.121.76"
 const defaultPrometheusPort = 22
-const defaultPrometheusUser = "root"
+const defaultPrometheusUser = "hpa-remote-executor"
 const ccServerSshKey = "/root/.ssh/id_rsa"
 
 type SSHCommand struct {
@@ -92,16 +92,14 @@ func (client *SSHClient) prepareCommand(session *ssh.Session, cmd *SSHCommand) e
 }
 
 func (client *SSHClient) newSession() (*ssh.Session, error) {
-	log.Printf("prometheusRemote: [%s:%d] creating connection\n", client.Host, client.Port)
+	//log.Printf("prometheusRemote: [%s:%d] creating connection\n", client.Host, client.Port)
 	connection, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", client.Host, client.Port), client.Config)
-	//var session *ssh.Session
-	//var err error
 
 	if err != nil {
 		log.Printf("prometheusRemote: [%s:%d] ssh connection failed!\n", client.Host, client.Port)
 		return nil, fmt.Errorf("Failed to dial: %s", err)
 	} else {
-		log.Printf("prometheusRemote: [%s:%d] ssh connection created\n", client.Host, client.Port)
+		//log.Printf("prometheusRemote: [%s:%d] ssh connection created\n", client.Host, client.Port)
 	}
 
 	session, err := connection.NewSession()
@@ -139,6 +137,8 @@ func publicKeyFile(prometheusServer string, prometheusPort int, file string) ssh
 }
 
 func AddTarget() error {
+	var cmdStdout bytes.Buffer
+	var cmdStderr bytes.Buffer
 
 	pubKeyRs := publicKeyFile(defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey)
 	if pubKeyRs == nil {
@@ -162,17 +162,32 @@ func AddTarget() error {
 	}
 
 	cmd := &SSHCommand{
-		Path:   "ls -l $LC_DIR",
-		Stdin:  os.Stdin,
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
+		Path:   "prom-file-sd-node-ocb2c oc-101.hcloud.cz",
+		Stdout: &cmdStdout,
+		Stderr: &cmdStderr,
 	}
 
 	log.Printf("prometheusRemote: [%s:%d] running command: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmd.Path)
 	err := client.runCommand(cmd)
+
+	cmdStdoutString := cmdStdout.String()
+	cmdStderrString := cmdStderr.String()
+
+	// TODO
+	// serialize multiline output into one line output
+	// code below generates wrong order of bytes, or something like that
+	//cmdStdoutString = strings.ReplaceAll(cmdStdoutString, "\n", `\n`)
+	//cmdStderrString = strings.ReplaceAll(cmdStderrString, "\n", `\n`)
+
+	log.Printf("prometheusRemote: [%s:%d] Stdout: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStdoutString)
+	log.Printf("prometheusRemote: [%s:%d] Stderr: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStderrString)
+
 	if err != nil {
 		log.Printf("prometheusRemote: [%s:%d] command run error: %s\n", defaultPrometheusServer, defaultPrometheusPort, err)
 		return err
+	} else {
+		// TODO
+		// return cmdStdoutString, cmdStderrString
+		return nil
 	}
-	return nil
 }
