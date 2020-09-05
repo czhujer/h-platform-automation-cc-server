@@ -38,6 +38,18 @@ func prometheusRemoteTargetAddHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func prometheusRemoteTargetRemoveHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	err := prometheusRemote.RemoveTarget()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
+	} else {
+		fmt.Fprintf(w, "{\"result\": \"prometheus target removed\"}\n")
+	}
+}
+
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
@@ -107,9 +119,9 @@ func main() {
 	// TODO
 	// add terraform handlers
 
-	// TODO
-	// add monitoring handlers
+	// monitoring handlers
 	router.HandleFunc("/prometheus/remote/target/add", prometheusRemoteTargetAddHandler)
+	router.HandleFunc("/prometheus/remote/target/remove", prometheusRemoteTargetRemoveHandler)
 
 	// default handler
 	notFoundHandlermw := gorilla.Middleware(

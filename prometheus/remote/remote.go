@@ -191,3 +191,10 @@ func AddTarget() error {
 		return nil
 	}
 }
+
+func RemoveTarget() error {
+	// TODO
+	// add logic
+
+	return nil
+}
