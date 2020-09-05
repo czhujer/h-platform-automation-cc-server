@@ -2,7 +2,6 @@ package terraform
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"log"
 )
@@ -30,8 +29,8 @@ func Show() error {
 		return err
 	}
 
-	fmt.Println(state.FormatVersion)
-	fmt.Println(state.Values)
+	log.Printf("terraform: show: \"state.FormatVersion\": %s", state.FormatVersion)
+	log.Printf("terraform: show: \"state.Values\": %s", state.Values)
 
 	return nil
 }
