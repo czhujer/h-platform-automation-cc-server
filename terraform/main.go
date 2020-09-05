@@ -10,7 +10,7 @@ import (
 const terraformPath = "/opt/terraform_0.13.2"
 const terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud"
 
-func main() {
+func Run() error {
 	//tmpDir, err := ioutil.TempDir("", "tfinstall")
 	//if err != nil {
 	//	panic(err)
@@ -38,4 +38,6 @@ func main() {
 	}
 
 	fmt.Println(state.FormatVersion)
+
+	return nil
 }

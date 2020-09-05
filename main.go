@@ -4,6 +4,7 @@ import (
 	"cc-server/calculoid"
 	prometheusRemote "cc-server/prometheus/remote"
 	"cc-server/proxmox"
+	"cc-server/terraform"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
 	"github.com/gorilla/handlers"
@@ -59,6 +60,25 @@ func prometheusRemoteTargetRemoveHandler(w http.ResponseWriter, r *http.Request)
 		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
 	} else {
 		fmt.Fprintf(w, "{\"result\": \"prometheus target removed\"}\n")
+	}
+}
+
+func terraformOwncloudstackCreateHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// TODO
+	// check if request is GET/POST
+
+	// TODO
+	// add loading/generating vmNameFull variable
+
+	err := terraform.Run()
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
+	} else {
+		fmt.Fprintf(w, "{\"result\": \"terraform executed\"}\n")
 	}
 }
 
@@ -132,8 +152,8 @@ func main() {
 	router.HandleFunc("/prometheus/remote/target/add", prometheusRemoteTargetAddHandler)
 	router.HandleFunc("/prometheus/remote/target/remove", prometheusRemoteTargetRemoveHandler)
 
-	// TODO
-	// add terraform handlers
+	// terraform handlers
+	router.HandleFunc("/terraform/owncloudstack/create", terraformOwncloudstackCreateHandler)
 
 	// default handler
 	notFoundHandlermw := gorilla.Middleware(
