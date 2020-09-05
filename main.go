@@ -5,6 +5,7 @@ import (
 	prometheusRemote "cc-server/prometheus/remote"
 	"cc-server/proxmox"
 	"cc-server/terraform"
+	tfowncloudstack "cc-server/terraform/owncloudstack"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
 	"github.com/gorilla/handlers"
@@ -72,13 +73,22 @@ func terraformOwncloudstackCreateHandler(w http.ResponseWriter, r *http.Request)
 	// TODO
 	// add loading/generating vmNameFull variable
 
-	err := terraform.Run()
+	err := terraform.Show()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
 	} else {
-		fmt.Fprintf(w, "{\"result\": \"terraform executed\"}\n")
+		fmt.Fprintf(w, "{\"result\": \"terraform show executed\"}\n")
+	}
+
+	err2 := tfowncloudstack.Create()
+
+	if err2 != nil {
+		//w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err2)
+	} else {
+		fmt.Fprintf(w, "{\"result\": \"terraform create executed\"}\n")
 	}
 }
 

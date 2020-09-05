@@ -1,4 +1,4 @@
-package terraform
+package owncloudstack
 
 import (
 	"context"
@@ -7,10 +7,17 @@ import (
 	"log"
 )
 
-func Show() error {
+// TODO
+// generate oc-xoy.trvars
+// example:
+// vmname = "oc-xyz"
+// vmip = "10.1.2.4"
+// vm_data_disk_size = "10"
 
-	const terraformPath = "/opt/terraform_0.13.2/terraform"
-	const terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud"
+func Create() error {
+
+	var terraformPath = "/opt/terraform_0.13.2/terraform"
+	var terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud"
 
 	tf, err := tfexec.NewTerraform(terraformWorkingDir, terraformPath)
 	if err != nil {
@@ -24,14 +31,16 @@ func Show() error {
 		return err
 	}
 
-	state, err := tf.Show(context.Background())
+	// TODO
+	// add options for oc.var
+
+	rs, err := tf.Plan(context.Background())
 	if err != nil {
-		log.Printf("terraform: show error: %s", err)
+		log.Printf("terraform: plan error: %s", err)
 		return err
 	}
 
-	fmt.Println(state.FormatVersion)
-	fmt.Println(state.Values)
+	fmt.Println(rs)
 
 	return nil
 }
