@@ -29,6 +29,12 @@ func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
 func prometheusRemoteTargetAddHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	// TODO
+	// check if request is GET/POST
+
+	// TODO
+	// add loading/generating vmNameFull variable
+
 	err := prometheusRemote.AddTarget()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -40,6 +46,12 @@ func prometheusRemoteTargetAddHandler(w http.ResponseWriter, r *http.Request) {
 
 func prometheusRemoteTargetRemoveHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	// TODO
+	// check if request is POST
+
+	// TODO
+	// add loading vmNameFull variable from request
 
 	err := prometheusRemote.RemoveTarget()
 	if err != nil {
@@ -116,12 +128,12 @@ func main() {
 
 	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmox.PovisioningServerContainerCreateHandler)
 
-	// TODO
-	// add terraform handlers
-
 	// monitoring handlers
 	router.HandleFunc("/prometheus/remote/target/add", prometheusRemoteTargetAddHandler)
 	router.HandleFunc("/prometheus/remote/target/remove", prometheusRemoteTargetRemoveHandler)
+
+	// TODO
+	// add terraform handlers
 
 	// default handler
 	notFoundHandlermw := gorilla.Middleware(
