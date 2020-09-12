@@ -81,6 +81,10 @@ func terraformOwncloudstackCreateHandler(w http.ResponseWriter, r *http.Request)
 	} else {
 		fmt.Fprintf(w, "{\"result\": \"terraform create executed\"}\n")
 	}
+
+	//TODO
+	// add monitoring targets
+	// prometheusRemote.AddTarget()
 }
 
 func terraformOwncloudstackdockerCreateHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +105,10 @@ func terraformOwncloudstackdockerCreateHandler(w http.ResponseWriter, r *http.Re
 	} else {
 		fmt.Fprintf(w, "{\"result\": \"terraform create executed\"}\n")
 	}
+
+	//TODO
+	// add monitoring targets
+	// prometheusRemote.AddTarget()
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
