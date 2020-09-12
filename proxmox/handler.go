@@ -54,7 +54,7 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 	}
 }
 
-func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseWriter, r *http.Request) {
+func (proxmox *Proxmox) ProvisioningServerContainerCreateHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "GET" {

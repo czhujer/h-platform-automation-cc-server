@@ -4,8 +4,7 @@ import (
 	"cc-server/calculoid"
 	prometheusRemote "cc-server/prometheus/remote"
 	"cc-server/proxmox"
-	tfOwncloudstack "cc-server/terraform/owncloudstack"
-	tfOwncloudstackDocker "cc-server/terraform/owncloudstackdocker"
+	"cc-server/terraform"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
 	"github.com/gorilla/handlers"
@@ -64,53 +63,6 @@ func prometheusRemoteTargetRemoveHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func terraformOwncloudstackCreateHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	//TODO
-	// check if request is GET/POST
-
-	//TODO
-	// add loading/generating vmNameFull variable
-
-	err := tfOwncloudstack.Create()
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
-	} else {
-		fmt.Fprintf(w, "{\"result\": \"terraform create executed\"}\n")
-	}
-
-	//TODO
-	// add monitoring targets
-	// prometheusRemote.AddTarget()
-}
-
-func terraformOwncloudstackdockerCreateHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	//TODO
-	// check if request is GET/POST
-
-	//TODO
-	// add loading/generating vmNameFull variable
-
-	//TODO
-	// add logic
-	err := tfOwncloudstackDocker.Create()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
-	} else {
-		fmt.Fprintf(w, "{\"result\": \"terraform create executed\"}\n")
-	}
-
-	//TODO
-	// add monitoring targets
-	// prometheusRemote.AddTarget()
-}
-
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
@@ -165,6 +117,8 @@ func main() {
 
 	proxmox := &proxmox.Proxmox{}
 
+	tf := &terraform.Terraform{}
+
 	router.Path("/metrics").Handler(promhttp.Handler())
 
 	router.HandleFunc("/", homeLinkHandler)
@@ -175,14 +129,15 @@ func main() {
 	// v2-arch handlers
 	router.HandleFunc("/proxmox-provisioning-server/container/all", proxmox.ProvisioningServerGetContainerHandler)
 
-	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmox.PovisioningServerContainerCreateHandler)
+	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmox.ProvisioningServerContainerCreateHandler)
 
 	// monitoring handlers
 	router.HandleFunc("/prometheus/remote/target/add", prometheusRemoteTargetAddHandler)
 	router.HandleFunc("/prometheus/remote/target/remove", prometheusRemoteTargetRemoveHandler)
 
 	// terraform handlers
-	router.HandleFunc("/terraform/owncloudstack/create", terraformOwncloudstackCreateHandler)
+	router.HandleFunc("/terraform/owncloudstack/create", tf.TerraformOwncloudstackCreateHandler)
+	router.HandleFunc("/terraform/owncloudstackdocker/create", tf.TerraformOwncloudstackdockerCreateHandler)
 
 	// default handler
 	notFoundHandlermw := gorilla.Middleware(
