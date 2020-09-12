@@ -1,13 +1,19 @@
 package owncloudstack
 
+import (
+	"fmt"
+	"log"
+	"os/exec"
+)
+
 func Create() error {
+	var terraformScriptDir = "/root/h-platform-automation-core/tf-owncloud/scripts"
 
-	//var terraformPath = "/opt/terraform_0.13.2/terraform"
-	//var terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud"
-
-	//TODO
-	// generate oc-3xy.tfvars
-	// wrapper script: tf-owncloud-generate-tfvars.sh
+	cmd := exec.Command(fmt.Sprintf("%s/tf-owncloud-generate-tfvars.sh", terraformScriptDir))
+	if err := cmd.Run(); err != nil {
+		log.Printf("terraform: generate tfvars failed: %s", err)
+		return err
+	}
 
 	//TODO
 	// run terraform
