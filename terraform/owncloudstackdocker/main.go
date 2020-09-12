@@ -9,7 +9,7 @@ import (
 func Create() error {
 	var err error
 	var rsPlan bool
-	var terraformPath = "/opt/terraform_0.13.2/terraform"
+	var terraformPath = "/opt/terraform_0.12.29/terraform"
 	var terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud-docker"
 
 	//TODO
