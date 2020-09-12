@@ -92,6 +92,20 @@ func terraformOwncloudstackCreateHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+func terraformOwncloudstackdockerCreateHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	//TODO
+	// check if request is GET/POST
+
+	//TODO
+	// add loading/generating vmNameFull variable
+
+	//TODO
+	// add logic
+
+}
+
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
