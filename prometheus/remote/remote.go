@@ -161,6 +161,9 @@ func AddTarget() error {
 
 	returnErr = nil
 
+	//TODO
+	// add tracing support
+
 	pubKeyRs := publicKeyFile(defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey)
 	if pubKeyRs == nil {
 		return fmt.Errorf("prometheusRemote: [%s:%d] unable to load publicKeyFile: %s", defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey)
@@ -222,6 +225,9 @@ func AddTarget() error {
 }
 
 func RemoveTarget() error {
+	//TODO
+	// add tracing support
+
 	//TODO
 	// add logic
 

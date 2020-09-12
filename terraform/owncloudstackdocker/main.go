@@ -8,7 +8,8 @@ import (
 )
 
 func Create() error {
-
+	//TODO
+	// add tracing support
 	var terraformPath = "/opt/terraform_0.13.2/terraform"
 	var terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud"
 
