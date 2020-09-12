@@ -2,7 +2,7 @@ package main
 
 import (
 	"cc-server/calculoid"
-	prometheusRemote "cc-server/prometheus/remote"
+	ccPrometheus "cc-server/prometheus"
 	"cc-server/proxmox"
 	"cc-server/terraform"
 	"fmt"
@@ -25,42 +25,6 @@ func homeLinkHandler(w http.ResponseWriter, r *http.Request) {
 	//TODO
 	// add html template
 	fmt.Fprintf(w, "Welcome in C&C server API\n")
-}
-
-func prometheusRemoteTargetAddHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	//TODO
-	// check if request is GET/POST
-
-	//TODO
-	// add loading/generating vmNameFull variable
-
-	err := prometheusRemote.AddTarget()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
-	} else {
-		fmt.Fprintf(w, "{\"result\": \"prometheus target added\"}\n")
-	}
-}
-
-func prometheusRemoteTargetRemoveHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	//TODO
-	// check if request is POST
-
-	//TODO
-	// add loading vmNameFull variable from request
-
-	err := prometheusRemote.RemoveTarget()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
-	} else {
-		fmt.Fprintf(w, "{\"result\": \"prometheus target removed\"}\n")
-	}
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -117,6 +81,8 @@ func main() {
 
 	proxmox := &proxmox.Proxmox{}
 
+	prom := &ccPrometheus.Prometheus{}
+
 	tf := &terraform.Terraform{}
 
 	router.Path("/metrics").Handler(promhttp.Handler())
@@ -132,8 +98,8 @@ func main() {
 	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmox.ProvisioningServerContainerCreateHandler)
 
 	// monitoring handlers
-	router.HandleFunc("/prometheus/remote/target/add", prometheusRemoteTargetAddHandler)
-	router.HandleFunc("/prometheus/remote/target/remove", prometheusRemoteTargetRemoveHandler)
+	router.HandleFunc("/prometheus/remote/target/add", prom.RemoteTargetAddHandler)
+	router.HandleFunc("/prometheus/remote/target/remove", prom.RemoteTargetRemoveHandler)
 
 	// terraform handlers
 	router.HandleFunc("/terraform/owncloudstack/create", tf.TerraformOwncloudstackCreateHandler)
