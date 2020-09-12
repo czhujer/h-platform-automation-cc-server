@@ -23,7 +23,7 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 		return
 	}
 
-	// TODO
+	//TODO
 	// add input params
 	//     proxmoxURL
 
@@ -54,7 +54,7 @@ func (proxmox *Proxmox) ProvisioningServerGetContainerHandler(w http.ResponseWri
 	}
 }
 
-func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseWriter, r *http.Request) {
+func (proxmox *Proxmox) ProvisioningServerContainerCreateHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "GET" {
@@ -70,7 +70,7 @@ func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseW
 		return
 	}
 
-	// TODO
+	//TODO
 	// add input params
 	//     disk, ram - one of this is required
 
@@ -101,6 +101,6 @@ func (proxmox *Proxmox) PovisioningServerContainerCreateHandler(w http.ResponseW
 	}
 
 	//TODO
-	// add monitoring target(s)/placeholder(s)
+	// add monitoring targets
 	// prometheusRemote.AddTarget()
 }

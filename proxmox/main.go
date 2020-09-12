@@ -17,7 +17,7 @@ type UrlInputData struct {
 var proxmoxServer string
 var proxmoxPort string
 
-const defaultProxmoxServer = "192.168.121.10"
+const defaultProxmoxServer = "hpa-pxm1"
 
 func getProxmoxUrl(r *http.Request) string {
 	var key string
@@ -30,7 +30,7 @@ func getProxmoxUrl(r *http.Request) string {
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields()
 
-		// TODO
+		//TODO
 		// fix rest of the unhandled cases
 		// https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
 

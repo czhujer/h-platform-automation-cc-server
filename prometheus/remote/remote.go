@@ -10,14 +10,14 @@ import (
 	"strings"
 )
 
-const defaultPrometheusServer = "192.168.121.76"
+const defaultPrometheusServer = "monitoring-stack"
 const defaultPrometheusPort = 22
 const defaultPrometheusUser = "hpa-remote-executor"
 const ccServerSshKey = "/root/.ssh/id_rsa"
 
-// TODO
+//TODO
 // remove hardcoded vmNameFull
-const vmNameFull = "oc-306.hcloud.cz"
+const vmNameFull = "oc-301.hcloud.cz"
 
 var monitoringTypes []string
 
@@ -161,6 +161,9 @@ func AddTarget() error {
 
 	returnErr = nil
 
+	//TODO
+	// add tracing support
+
 	pubKeyRs := publicKeyFile(defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey)
 	if pubKeyRs == nil {
 		return fmt.Errorf("prometheusRemote: [%s:%d] unable to load publicKeyFile: %s", defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey)
@@ -171,7 +174,7 @@ func AddTarget() error {
 		Auth: []ssh.AuthMethod{
 			publicKeyFile(defaultPrometheusServer, defaultPrometheusPort, ccServerSshKey),
 		},
-		// TODO
+		//TODO
 		// add check ssh fingerprint
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
@@ -210,7 +213,7 @@ func AddTarget() error {
 		log.Printf("prometheusRemote: [%s:%d] Stdout: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStdoutString)
 		log.Printf("prometheusRemote: [%s:%d] Stderr: %s\n", defaultPrometheusServer, defaultPrometheusPort, cmdStderrString)
 
-		// TODO
+		//TODO
 		// return cmdStdoutString, cmdStderrString
 
 		if err != nil {
@@ -222,7 +225,10 @@ func AddTarget() error {
 }
 
 func RemoveTarget() error {
-	// TODO
+	//TODO
+	// add tracing support
+
+	//TODO
 	// add logic
 
 	return nil

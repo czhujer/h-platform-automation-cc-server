@@ -69,7 +69,7 @@ func (c *Handler) CalculoidWebhookHandler() http.HandlerFunc {
 			c.queryParams(w, r)
 			c.calculoidWebhookParser()
 
-			// TODO
+			//TODO
 			// missing http code handling with corresponding status with c.calculoidWebhookParser()
 
 		} else {
@@ -107,7 +107,7 @@ func (c *Handler) calculoidWebhookParser() {
 
 	fmt.Println("")
 
-	// TODO
-	// error handling
-	// return status
+	//TODO
+	// add error handling
+	// add return status
 }
