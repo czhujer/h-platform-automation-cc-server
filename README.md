@@ -31,6 +31,9 @@ Command and Control server for whole platform
 #### ssh
 - https://gist.github.com/svett/b7f56afc966a6b6ac2fc
 
+#### os exec/fork
+- https://medium.com/rungo/executing-shell-commands-script-files-and-executables-in-go-894814f1c0f7
+
 #### terraform
 - https://pkg.go.dev/os/exec?tab=doc
 - https://gobyexample.com/execing-processes
