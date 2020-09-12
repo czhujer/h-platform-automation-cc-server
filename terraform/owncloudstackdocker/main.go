@@ -2,16 +2,18 @@ package owncloudstackdocker
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"log"
 )
 
 func Create() error {
-	//TODO
-	// add tracing support
+	var err error
+	var rsPlan bool
 	var terraformPath = "/opt/terraform_0.13.2/terraform"
 	var terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud"
+
+	//TODO
+	// add tracing support
 
 	tf, err := tfexec.NewTerraform(terraformWorkingDir, terraformPath)
 	if err != nil {
@@ -26,18 +28,21 @@ func Create() error {
 	}
 
 	// TODO
-	// add PlanOptions for oc-xyz.tfvars
+	// add PlanOptions for oc-1xyz.tfvars
 
-	rs, err := tf.Plan(context.Background())
+	rsPlan, err = tf.Plan(context.Background())
 	if err != nil {
 		log.Printf("terraform: plan error: %s", err)
 		return err
 	}
 
-	fmt.Println(rs)
+	log.Printf("terraform: apply results: %b", rsPlan)
 
-	// TODO
-	// add terraform apply
+	err = tf.Apply(context.Background())
+	if err != nil {
+		log.Printf("terraform: apply error: %s", err)
+		return err
+	}
 
 	return nil
 }
