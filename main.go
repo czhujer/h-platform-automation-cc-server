@@ -77,9 +77,9 @@ func main() {
 	router.Use(middleware.InstrumentHandlerDuration)
 
 	// handlers
-	calculoid := &calculoid.Handler{}
+	calc := &calculoid.Handler{}
 
-	proxmox := &proxmox.Proxmox{}
+	pxm := &proxmox.Proxmox{}
 
 	prom := &ccPrometheus.Prometheus{}
 
@@ -90,12 +90,14 @@ func main() {
 	router.HandleFunc("/", homeLinkHandler)
 
 	// v1-arch handlers
-	router.Handle("/calculoid/webhook", calculoid.CalculoidWebhookHandler())
+	router.Handle("/calculoid/webhook", calc.CalculoidWebhookHandler())
 
 	// v2-arch handlers
-	router.HandleFunc("/proxmox-provisioning-server/container/all", proxmox.ProvisioningServerGetContainerHandler)
+	//
 
-	router.HandleFunc("/proxmox-provisioning-server/container/create", proxmox.ProvisioningServerContainerCreateHandler)
+	// proxmox/lxc
+	router.HandleFunc("/proxmox-provisioning-server/container/all", pxm.ProvisioningServerGetContainerHandler)
+	router.HandleFunc("/proxmox-provisioning-server/container/create", pxm.ProvisioningServerContainerCreateHandler)
 
 	// monitoring handlers
 	router.HandleFunc("/prometheus/remote/target/add", prom.RemoteTargetAddHandler)
