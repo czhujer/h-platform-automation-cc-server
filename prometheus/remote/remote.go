@@ -10,14 +10,14 @@ import (
 	"strings"
 )
 
-const defaultPrometheusServer = "192.168.121.76"
+const defaultPrometheusServer = "monitoring-stack"
 const defaultPrometheusPort = 22
 const defaultPrometheusUser = "hpa-remote-executor"
 const ccServerSshKey = "/root/.ssh/id_rsa"
 
 //TODO
 // remove hardcoded vmNameFull
-const vmNameFull = "oc-306.hcloud.cz"
+const vmNameFull = "oc-301.hcloud.cz"
 
 var monitoringTypes []string
 

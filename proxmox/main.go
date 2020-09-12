@@ -17,7 +17,7 @@ type UrlInputData struct {
 var proxmoxServer string
 var proxmoxPort string
 
-const defaultProxmoxServer = "192.168.121.10"
+const defaultProxmoxServer = "hpa-pxm1"
 
 func getProxmoxUrl(r *http.Request) string {
 	var key string
