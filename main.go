@@ -4,7 +4,8 @@ import (
 	"cc-server/calculoid"
 	prometheusRemote "cc-server/prometheus/remote"
 	"cc-server/proxmox"
-	tfowncloudstack "cc-server/terraform/owncloudstack"
+	tfOwncloudstack "cc-server/terraform/owncloudstack"
+	tfOwncloudstackDocker "cc-server/terraform/owncloudstackdocker"
 	"fmt"
 	prometheusmiddleware "github.com/albertogviana/prometheus-middleware"
 	"github.com/gorilla/handlers"
@@ -72,11 +73,11 @@ func terraformOwncloudstackCreateHandler(w http.ResponseWriter, r *http.Request)
 	//TODO
 	// add loading/generating vmNameFull variable
 
-	err2 := tfowncloudstack.Create()
+	err := tfOwncloudstack.Create()
 
-	if err2 != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err2)
+		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
 	} else {
 		fmt.Fprintf(w, "{\"result\": \"terraform create executed\"}\n")
 	}
@@ -93,7 +94,13 @@ func terraformOwncloudstackdockerCreateHandler(w http.ResponseWriter, r *http.Re
 
 	//TODO
 	// add logic
-
+	err := tfOwncloudstackDocker.Create()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "{\"result\": \"%s\"}\n", err)
+	} else {
+		fmt.Fprintf(w, "{\"result\": \"terraform create executed\"}\n")
+	}
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
