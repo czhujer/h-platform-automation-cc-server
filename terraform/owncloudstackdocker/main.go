@@ -10,7 +10,7 @@ func Create() error {
 	var err error
 	var rsPlan bool
 	var terraformPath = "/opt/terraform_0.13.2/terraform"
-	var terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud"
+	var terraformWorkingDir = "/root/h-platform-automation-core/tf-owncloud-docker"
 
 	//TODO
 	// add tracing support
@@ -42,6 +42,8 @@ func Create() error {
 	if err != nil {
 		log.Printf("terraform: apply error: %s", err)
 		return err
+	} else {
+		log.Printf("terraform: apply executed")
 	}
 
 	return nil
