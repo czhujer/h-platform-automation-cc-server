@@ -13,7 +13,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.7.1
 	github.com/uber/jaeger-client-go v2.25.0+incompatible
-	github.com/uber/jaeger-lib v2.2.0+incompatible
+	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.uber.org/atomic v1.6.0 // indirect
 	golang.org/x/crypto v0.8.0
 	golang.org/x/net v0.9.0
