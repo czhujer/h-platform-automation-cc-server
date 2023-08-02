@@ -11,7 +11,7 @@ github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/gorilla/handlers v1.5.1
 github.com/gorilla/handlers
-# github.com/gorilla/mux v1.7.4
+# github.com/gorilla/mux v1.8.0
 github.com/gorilla/mux
 # github.com/hashicorp/go-version v1.2.1
 github.com/hashicorp/go-version
