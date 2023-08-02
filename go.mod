@@ -11,8 +11,8 @@ require (
 	github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644
 	github.com/opentracing-contrib/go-stdlib v1.0.0
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/prometheus/client_golang v1.11.1
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
+	github.com/prometheus/client_golang v1.16.0
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.uber.org/atomic v1.6.0 // indirect
 	golang.org/x/crypto v0.11.0
