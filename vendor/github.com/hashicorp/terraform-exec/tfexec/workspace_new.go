@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package tfexec
 
 import (
@@ -41,7 +44,7 @@ func (tf *Terraform) WorkspaceNew(ctx context.Context, workspace string, opts ..
 	if err != nil {
 		return err
 	}
-	return tf.runTerraformCmd(cmd)
+	return tf.runTerraformCmd(ctx, cmd)
 }
 
 func (tf *Terraform) workspaceNewCmd(ctx context.Context, workspace string, opts ...WorkspaceNewCmdOption) (*exec.Cmd, error) {
@@ -77,7 +80,7 @@ func (tf *Terraform) workspaceNewCmd(ctx context.Context, workspace string, opts
 
 	args = append(args, workspace)
 
-	cmd := tf.buildTerraformCmd(ctx, args...)
+	cmd := tf.buildTerraformCmd(ctx, nil, args...)
 
 	return cmd, nil
 }

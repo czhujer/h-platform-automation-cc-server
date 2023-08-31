@@ -1,24 +1,32 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package tfexec
 
 import (
 	"context"
 	"fmt"
+	"io"
 	"os/exec"
 	"strconv"
 )
 
 type applyConfig struct {
 	backup    string
+	destroy   bool
 	dirOrPlan string
 	lock      bool
 
 	// LockTimeout must be a string with time unit, e.g. '10s'
-	lockTimeout string
-	parallelism int
-	refresh     bool
-	state       string
-	stateOut    string
-	targets     []string
+	lockTimeout  string
+	parallelism  int
+	reattachInfo ReattachInfo
+	refresh      bool
+	refreshOnly  bool
+	replaceAddrs []string
+	state        string
+	stateOut     string
+	targets      []string
 
 	// Vars: each var must be supplied as a single string, e.g. 'foo=bar'
 	vars     []string
@@ -26,6 +34,7 @@ type applyConfig struct {
 }
 
 var defaultApplyOptions = applyConfig{
+	destroy:     false,
 	lock:        true,
 	parallelism: 10,
 	refresh:     true,
@@ -72,6 +81,14 @@ func (opt *RefreshOption) configureApply(conf *applyConfig) {
 	conf.refresh = opt.refresh
 }
 
+func (opt *RefreshOnlyOption) configureApply(conf *applyConfig) {
+	conf.refreshOnly = opt.refreshOnly
+}
+
+func (opt *ReplaceOption) configureApply(conf *applyConfig) {
+	conf.replaceAddrs = append(conf.replaceAddrs, opt.address)
+}
+
 func (opt *VarOption) configureApply(conf *applyConfig) {
 	conf.vars = append(conf.vars, opt.assignment)
 }
@@ -80,17 +97,77 @@ func (opt *DirOrPlanOption) configureApply(conf *applyConfig) {
 	conf.dirOrPlan = opt.path
 }
 
-func (tf *Terraform) Apply(ctx context.Context, opts ...ApplyOption) error {
-	return tf.runTerraformCmd(tf.applyCmd(ctx, opts...))
+func (opt *ReattachOption) configureApply(conf *applyConfig) {
+	conf.reattachInfo = opt.info
 }
 
-func (tf *Terraform) applyCmd(ctx context.Context, opts ...ApplyOption) *exec.Cmd {
+func (opt *DestroyFlagOption) configureApply(conf *applyConfig) {
+	conf.destroy = opt.destroy
+}
+
+// Apply represents the terraform apply subcommand.
+func (tf *Terraform) Apply(ctx context.Context, opts ...ApplyOption) error {
+	cmd, err := tf.applyCmd(ctx, opts...)
+	if err != nil {
+		return err
+	}
+	return tf.runTerraformCmd(ctx, cmd)
+}
+
+// ApplyJSON represents the terraform apply subcommand with the `-json` flag.
+// Using the `-json` flag will result in
+// [machine-readable](https://developer.hashicorp.com/terraform/internals/machine-readable-ui)
+// JSON being written to the supplied `io.Writer`. ApplyJSON is likely to be
+// removed in a future major version in favour of Apply returning JSON by default.
+func (tf *Terraform) ApplyJSON(ctx context.Context, w io.Writer, opts ...ApplyOption) error {
+	err := tf.compatible(ctx, tf0_15_3, nil)
+	if err != nil {
+		return fmt.Errorf("terraform apply -json was added in 0.15.3: %w", err)
+	}
+
+	tf.SetStdout(w)
+
+	cmd, err := tf.applyJSONCmd(ctx, opts...)
+	if err != nil {
+		return err
+	}
+
+	return tf.runTerraformCmd(ctx, cmd)
+}
+
+func (tf *Terraform) applyCmd(ctx context.Context, opts ...ApplyOption) (*exec.Cmd, error) {
 	c := defaultApplyOptions
 
 	for _, o := range opts {
 		o.configureApply(&c)
 	}
 
+	args, err := tf.buildApplyArgs(ctx, c)
+	if err != nil {
+		return nil, err
+	}
+
+	return tf.buildApplyCmd(ctx, c, args)
+}
+
+func (tf *Terraform) applyJSONCmd(ctx context.Context, opts ...ApplyOption) (*exec.Cmd, error) {
+	c := defaultApplyOptions
+
+	for _, o := range opts {
+		o.configureApply(&c)
+	}
+
+	args, err := tf.buildApplyArgs(ctx, c)
+	if err != nil {
+		return nil, err
+	}
+
+	args = append(args, "-json")
+
+	return tf.buildApplyCmd(ctx, c, args)
+}
+
+func (tf *Terraform) buildApplyArgs(ctx context.Context, c applyConfig) ([]string, error) {
 	args := []string{"apply", "-no-color", "-auto-approve", "-input=false"}
 
 	// string opts: only pass if set
@@ -115,7 +192,35 @@ func (tf *Terraform) applyCmd(ctx context.Context, opts ...ApplyOption) *exec.Cm
 	args = append(args, "-parallelism="+fmt.Sprint(c.parallelism))
 	args = append(args, "-refresh="+strconv.FormatBool(c.refresh))
 
+	if c.refreshOnly {
+		err := tf.compatible(ctx, tf0_15_4, nil)
+		if err != nil {
+			return nil, fmt.Errorf("refresh-only option was introduced in Terraform 0.15.4: %w", err)
+		}
+		if !c.refresh {
+			return nil, fmt.Errorf("you cannot use refresh=false in refresh-only planning mode")
+		}
+		args = append(args, "-refresh-only")
+	}
+
 	// string slice opts: split into separate args
+	if c.replaceAddrs != nil {
+		err := tf.compatible(ctx, tf0_15_2, nil)
+		if err != nil {
+			return nil, fmt.Errorf("replace option was introduced in Terraform 0.15.2: %w", err)
+		}
+		for _, addr := range c.replaceAddrs {
+			args = append(args, "-replace="+addr)
+		}
+	}
+	if c.destroy {
+		err := tf.compatible(ctx, tf0_15_2, nil)
+		if err != nil {
+			return nil, fmt.Errorf("-destroy option was introduced in Terraform 0.15.2: %w", err)
+		}
+		args = append(args, "-destroy")
+	}
+
 	if c.targets != nil {
 		for _, ta := range c.targets {
 			args = append(args, "-target="+ta)
@@ -127,10 +232,23 @@ func (tf *Terraform) applyCmd(ctx context.Context, opts ...ApplyOption) *exec.Cm
 		}
 	}
 
+	return args, nil
+}
+
+func (tf *Terraform) buildApplyCmd(ctx context.Context, c applyConfig, args []string) (*exec.Cmd, error) {
 	// string argument: pass if set
 	if c.dirOrPlan != "" {
 		args = append(args, c.dirOrPlan)
 	}
 
-	return tf.buildTerraformCmd(ctx, args...)
+	mergeEnv := map[string]string{}
+	if c.reattachInfo != nil {
+		reattachStr, err := c.reattachInfo.marshalString()
+		if err != nil {
+			return nil, err
+		}
+		mergeEnv[reattachEnvVar] = reattachStr
+	}
+
+	return tf.buildTerraformCmd(ctx, mergeEnv, args...), nil
 }
