@@ -1,9 +1,17 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package tfexec
 
 import (
+	"bufio"
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,24 +20,79 @@ import (
 )
 
 const (
-	checkpointDisableEnvVar = "CHECKPOINT_DISABLE"
-	logEnvVar               = "TF_LOG"
-	inputEnvVar             = "TF_INPUT"
-	automationEnvVar        = "TF_IN_AUTOMATION"
-	logPathEnvVar           = "TF_LOG_PATH"
-	reattachEnvVar          = "TF_REATTACH_PROVIDERS"
-	appendUserAgentEnvVar   = "TF_APPEND_USER_AGENT"
+	checkpointDisableEnvVar  = "CHECKPOINT_DISABLE"
+	cliArgsEnvVar            = "TF_CLI_ARGS"
+	inputEnvVar              = "TF_INPUT"
+	automationEnvVar         = "TF_IN_AUTOMATION"
+	logEnvVar                = "TF_LOG"
+	logCoreEnvVar            = "TF_LOG_CORE"
+	logPathEnvVar            = "TF_LOG_PATH"
+	logProviderEnvVar        = "TF_LOG_PROVIDER"
+	reattachEnvVar           = "TF_REATTACH_PROVIDERS"
+	appendUserAgentEnvVar    = "TF_APPEND_USER_AGENT"
+	workspaceEnvVar          = "TF_WORKSPACE"
+	disablePluginTLSEnvVar   = "TF_DISABLE_PLUGIN_TLS"
+	skipProviderVerifyEnvVar = "TF_SKIP_PROVIDER_VERIFY"
 
-	varEnvVarPrefix = "TF_VAR_"
+	varEnvVarPrefix    = "TF_VAR_"
+	cliArgEnvVarPrefix = "TF_CLI_ARGS_"
 )
 
 var prohibitedEnvVars = []string{
+	cliArgsEnvVar,
 	inputEnvVar,
 	automationEnvVar,
-	logPathEnvVar,
 	logEnvVar,
+	logCoreEnvVar,
+	logPathEnvVar,
+	logProviderEnvVar,
 	reattachEnvVar,
 	appendUserAgentEnvVar,
+	workspaceEnvVar,
+	disablePluginTLSEnvVar,
+	skipProviderVerifyEnvVar,
+}
+
+var prohibitedEnvVarPrefixes = []string{
+	varEnvVarPrefix,
+	cliArgEnvVarPrefix,
+}
+
+func manualEnvVars(env map[string]string, cb func(k string)) {
+	for k := range env {
+		for _, p := range prohibitedEnvVars {
+			if p == k {
+				cb(k)
+				goto NextEnvVar
+			}
+		}
+		for _, prefix := range prohibitedEnvVarPrefixes {
+			if strings.HasPrefix(k, prefix) {
+				cb(k)
+				goto NextEnvVar
+			}
+		}
+	NextEnvVar:
+	}
+}
+
+// ProhibitedEnv returns a slice of environment variable keys that are not allowed
+// to be set manually from the passed environment.
+func ProhibitedEnv(env map[string]string) []string {
+	var p []string
+	manualEnvVars(env, func(k string) {
+		p = append(p, k)
+	})
+	return p
+}
+
+// CleanEnv removes any prohibited environment variables from an environment map.
+func CleanEnv(dirty map[string]string) map[string]string {
+	clean := dirty
+	manualEnvVars(clean, func(k string) {
+		delete(clean, k)
+	})
+	return clean
 }
 
 func envMap(environ []string) map[string]string {
@@ -92,49 +155,56 @@ func (tf *Terraform) buildEnv(mergeEnv map[string]string) []string {
 	if tf.logPath == "" {
 		// so logging can't pollute our stderr output
 		env[logEnvVar] = ""
+		env[logCoreEnvVar] = ""
 		env[logPathEnvVar] = ""
+		env[logProviderEnvVar] = ""
 	} else {
+		env[logEnvVar] = tf.log
+		env[logCoreEnvVar] = tf.logCore
 		env[logPathEnvVar] = tf.logPath
-		// Log levels other than TRACE are currently unreliable, the CLI recommends using TRACE only.
-		env[logEnvVar] = "TRACE"
+		env[logProviderEnvVar] = tf.logProvider
 	}
 
 	// constant automation override env vars
 	env[automationEnvVar] = "1"
 
+	// force usage of workspace methods for switching
+	delete(env, workspaceEnvVar)
+
+	if tf.disablePluginTLS {
+		env[disablePluginTLSEnvVar] = "1"
+	}
+
+	if tf.skipProviderVerify {
+		env[skipProviderVerifyEnvVar] = "1"
+	}
+
 	return envSlice(env)
 }
 
-func (tf *Terraform) buildTerraformCmd(ctx context.Context, args ...string) *exec.Cmd {
+func (tf *Terraform) buildTerraformCmd(ctx context.Context, mergeEnv map[string]string, args ...string) *exec.Cmd {
 	cmd := exec.CommandContext(ctx, tf.execPath, args...)
-	cmd.Env = tf.buildEnv(nil)
+
+	cmd.Env = tf.buildEnv(mergeEnv)
 	cmd.Dir = tf.workingDir
 
-	tf.logger.Printf("[INFO] running Terraform command: %s", cmdString(cmd))
+	tf.logger.Printf("[INFO] running Terraform command: %s", cmd.String())
 
 	return cmd
 }
 
-func (tf *Terraform) runTerraformCmd(cmd *exec.Cmd) error {
-	var errBuf strings.Builder
+func (tf *Terraform) runTerraformCmdJSON(ctx context.Context, cmd *exec.Cmd, v interface{}) error {
+	var outbuf = bytes.Buffer{}
+	cmd.Stdout = mergeWriters(cmd.Stdout, &outbuf)
 
-	stdout := tf.stdout
-	if cmd.Stdout != nil {
-		stdout = io.MultiWriter(stdout, cmd.Stdout)
-	}
-	cmd.Stdout = stdout
-
-	stderr := io.MultiWriter(&errBuf, tf.stderr)
-	if cmd.Stderr != nil {
-		stderr = io.MultiWriter(stderr, cmd.Stderr)
-	}
-	cmd.Stderr = stderr
-
-	err := cmd.Run()
+	err := tf.runTerraformCmd(ctx, cmd)
 	if err != nil {
-		return parseError(err, errBuf.String())
+		return err
 	}
-	return nil
+
+	dec := json.NewDecoder(&outbuf)
+	dec.UseNumber()
+	return dec.Decode(v)
 }
 
 // mergeUserAgent does some minor deduplication to ensure we aren't
@@ -155,4 +225,53 @@ func mergeUserAgent(uas ...string) string {
 		merged = append(merged, ua)
 	}
 	return strings.Join(merged, " ")
+}
+
+func mergeWriters(writers ...io.Writer) io.Writer {
+	compact := []io.Writer{}
+	for _, w := range writers {
+		if w != nil {
+			compact = append(compact, w)
+		}
+	}
+	if len(compact) == 0 {
+		return ioutil.Discard
+	}
+	if len(compact) == 1 {
+		return compact[0]
+	}
+	return io.MultiWriter(compact...)
+}
+
+func writeOutput(ctx context.Context, r io.ReadCloser, w io.Writer) error {
+	// ReadBytes will block until bytes are read, which can cause a delay in
+	// returning even if the command's context has been canceled. Use a separate
+	// goroutine to prompt ReadBytes to return on cancel
+	closeCtx, closeCancel := context.WithCancel(ctx)
+	defer closeCancel()
+	go func() {
+		select {
+		case <-ctx.Done():
+			r.Close()
+		case <-closeCtx.Done():
+			return
+		}
+	}()
+
+	buf := bufio.NewReader(r)
+	for {
+		line, err := buf.ReadBytes('\n')
+		if len(line) > 0 {
+			if _, err := w.Write(line); err != nil {
+				return err
+			}
+		}
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil
+			}
+
+			return err
+		}
+	}
 }

@@ -7,7 +7,7 @@ require (
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.7.4
-	github.com/hashicorp/terraform-exec v0.8.0
+	github.com/hashicorp/terraform-exec v0.19.0
 	github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644
 	github.com/opentracing-contrib/go-stdlib v1.0.0
 	github.com/opentracing/opentracing-go v1.2.0

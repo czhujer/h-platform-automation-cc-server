@@ -1,5 +1,7 @@
 # github.com/albertogviana/prometheus-middleware v0.0.1
 github.com/albertogviana/prometheus-middleware
+# github.com/apparentlymart/go-textseg/v15 v15.0.0
+github.com/apparentlymart/go-textseg/v15/textseg
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
 # github.com/cespare/xxhash/v2 v2.2.0
@@ -13,12 +15,12 @@ github.com/golang/protobuf/ptypes/timestamp
 github.com/gorilla/handlers
 # github.com/gorilla/mux v1.7.4
 github.com/gorilla/mux
-# github.com/hashicorp/go-version v1.2.1
+# github.com/hashicorp/go-version v1.6.0
 github.com/hashicorp/go-version
-# github.com/hashicorp/terraform-exec v0.8.0
+# github.com/hashicorp/terraform-exec v0.19.0
 github.com/hashicorp/terraform-exec/internal/version
 github.com/hashicorp/terraform-exec/tfexec
-# github.com/hashicorp/terraform-json v0.5.0
+# github.com/hashicorp/terraform-json v0.17.1
 github.com/hashicorp/terraform-json
 # github.com/matttproud/golang_protobuf_extensions v1.0.4
 github.com/matttproud/golang_protobuf_extensions/pbutil
@@ -68,8 +70,9 @@ github.com/uber/jaeger-client-go/utils
 # github.com/uber/jaeger-lib v2.4.1+incompatible
 github.com/uber/jaeger-lib/metrics
 github.com/uber/jaeger-lib/metrics/prometheus
-# github.com/zclconf/go-cty v1.2.1
+# github.com/zclconf/go-cty v1.14.0
 github.com/zclconf/go-cty/cty
+github.com/zclconf/go-cty/cty/ctystrings
 github.com/zclconf/go-cty/cty/set
 # go.uber.org/atomic v1.6.0
 go.uber.org/atomic
