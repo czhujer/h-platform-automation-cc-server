@@ -1,4 +1,4 @@
-# github.com/albertogviana/prometheus-middleware v0.0.1
+# github.com/albertogviana/prometheus-middleware v0.0.2
 github.com/albertogviana/prometheus-middleware
 # github.com/apparentlymart/go-textseg/v15 v15.0.0
 github.com/apparentlymart/go-textseg/v15/textseg
