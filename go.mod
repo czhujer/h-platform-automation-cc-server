@@ -3,7 +3,7 @@ module cc-server
 go 1.13
 
 require (
-	github.com/albertogviana/prometheus-middleware v0.0.1
+	github.com/albertogviana/prometheus-middleware v0.0.2
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.7.4
