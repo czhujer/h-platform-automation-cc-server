@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/albertogviana/prometheus-middleware v0.0.2
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
-	github.com/gorilla/handlers v1.5.1
+	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/terraform-exec v0.20.0
 	github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644
