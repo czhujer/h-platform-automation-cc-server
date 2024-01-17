@@ -16,5 +16,5 @@ require (
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.uber.org/atomic v1.6.0 // indirect
 	golang.org/x/crypto v0.18.0
-	golang.org/x/net v0.18.0
+	golang.org/x/net v0.20.0
 )
