@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/terraform-exec v0.21.0
 	github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644
-	github.com/opentracing-contrib/go-stdlib v1.0.0
+	github.com/opentracing-contrib/go-stdlib v1.1.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/uber/jaeger-client-go v2.25.0+incompatible
