@@ -23,7 +23,7 @@ github.com/hashicorp/terraform-json
 github.com/matttproud/golang_protobuf_extensions/v2/pbutil
 # github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644
 github.com/opentracing-contrib/go-gorilla/gorilla
-# github.com/opentracing-contrib/go-stdlib v1.0.0
+# github.com/opentracing-contrib/go-stdlib v1.1.0
 github.com/opentracing-contrib/go-stdlib/nethttp
 # github.com/opentracing/opentracing-go v1.2.0
 github.com/opentracing/opentracing-go
