@@ -1020,7 +1020,7 @@ go.uber.org/atomic
 go.yaml.in/yaml/v2
 # golang.org/x/arch v0.1.0
 ## explicit; go 1.17
-# golang.org/x/crypto v0.49.0
+# golang.org/x/crypto v0.51.0
 ## explicit; go 1.25.0
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/chacha20
@@ -1039,29 +1039,29 @@ golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
 ## explicit; go 1.11
 # golang.org/x/mod v0.35.0
 ## explicit; go 1.25.0
-# golang.org/x/net v0.52.0
+# golang.org/x/net v0.53.0
 ## explicit; go 1.25.0
 golang.org/x/net/context
 # golang.org/x/oauth2 v0.30.0
 ## explicit; go 1.23.0
 # golang.org/x/sync v0.20.0
 ## explicit; go 1.25.0
-# golang.org/x/sys v0.42.0
+# golang.org/x/sys v0.44.0
 ## explicit; go 1.25.0
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/telemetry v0.0.0-20260311193753-579e4da9a98c
+# golang.org/x/telemetry v0.0.0-20260409153401-be6f6cb8b1fa
 ## explicit; go 1.25.0
-# golang.org/x/term v0.41.0
+# golang.org/x/term v0.43.0
 ## explicit; go 1.25.0
-# golang.org/x/text v0.35.0
+# golang.org/x/text v0.37.0
 ## explicit; go 1.25.0
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 # golang.org/x/time v0.3.0
 ## explicit
-# golang.org/x/tools v0.43.0
+# golang.org/x/tools v0.44.0
 ## explicit; go 1.25.0
 # golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 ## explicit; go 1.17
