@@ -7,7 +7,7 @@ require (
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/terraform-exec v0.25.1
-	github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644
+	github.com/opentracing-contrib/go-gorilla v0.0.0-20250314035245-902eddd291c5
 	github.com/opentracing-contrib/go-stdlib v1.0.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.23.2

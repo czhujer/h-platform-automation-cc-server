@@ -1219,6 +1219,8 @@ github.com/onsi/gomega v1.27.10/go.mod h1:RsS8tutOdbdgzbPtzzATp12yT7kM5I5aElG3ev
 github.com/onsi/gomega v1.34.1/go.mod h1:kU1QgUvBDLXBJq618Xvm2LUX6rSAfRaFRTcdOeDLwwY=
 github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644 h1:dbnugNaH2wyQcijsw7+Px7JAWtOP8Z4QkB/4pY/nOJM=
 github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644/go.mod h1:JcJTH6nsplW7FqrfVQW7XCWVSzOrxrgfMNYAoMBmHX0=
+github.com/opentracing-contrib/go-gorilla v0.0.0-20250314035245-902eddd291c5 h1:uPCs/3IvuUH3efyaNY9uHDwsjm4HiY1+mUSI85dudpQ=
+github.com/opentracing-contrib/go-gorilla v0.0.0-20250314035245-902eddd291c5/go.mod h1:JcJTH6nsplW7FqrfVQW7XCWVSzOrxrgfMNYAoMBmHX0=
 github.com/opentracing-contrib/go-stdlib v1.0.0 h1:TBS7YuVotp8myLon4Pv7BtCBzOTo1DeZCld0Z63mW2w=
 github.com/opentracing-contrib/go-stdlib v1.0.0/go.mod h1:qtI1ogk+2JhVPIXVc6q+NHziSmy2W5GbdQZFUHADCBU=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
