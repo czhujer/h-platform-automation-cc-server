@@ -309,8 +309,8 @@ github.com/albertogviana/prometheus-middleware
 ## explicit; go 1.17
 # github.com/apache/arrow/go/v11 v11.0.0
 ## explicit; go 1.18
-# github.com/apache/thrift v0.16.0
-## explicit; go 1.16
+# github.com/apache/thrift v0.24.0
+## explicit; go 1.25
 # github.com/apparentlymart/go-textseg v1.0.0
 ## explicit
 # github.com/apparentlymart/go-textseg/v15 v15.0.0
